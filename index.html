@@ -1,13 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aryan Neupane | Quietly Under Construction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --fg: #eaeaea;
+      --muted: #888;
+      --accent: #00ffe0;
+      --card: #161616;
+      --border: #2a2a2a;
+    }
+
+    * {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 4rem 1rem 2rem;
+      text-align: center;
+      animation: fadeIn 1.2s ease-in;
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: var(--accent);
+      font-family: 'Unbounded', sans-serif;
+    }
+
+    .typewriter {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      min-height: 2rem;
+    }
+
+    .section {
+      padding: 3rem 1rem;
+      max-width: 750px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,255,224,0.05);
+      margin-bottom: 2rem;
+    }
+
+    .carousel-quote {
+      font-style: italic;
+      font-size: 1.1rem;
+      color: #ccc;
+      transition: opacity 0.5s ease;
+    }
+
+    .socials {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-top: 2rem;
+    }
+
+    .socials a {
+      color: var(--accent);
+      text-decoration: none;
+      padding: 0.6rem 1rem;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .socials a:hover {
+      background-color: var(--accent);
+      color: #000;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    @keyframes fadeIn {
+      0% {opacity: 0; transform: translateY(20px);}
+      100% {opacity: 1; transform: translateY(0);}
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2.2rem; }
+    }
+  </style>
 </head>
 <body>
 
-   <!-- <script src="Js_Day2.js"></script>-->
-    <script src="Js_Day3Game.js"></script>
+  <header>
+    <h1>Aryan Neupane</h1>
+    <div class="typewriter" id="typewriter"></div>
+  </header>
+
+  <section class="section">
+    <div class="card">
+      <h2>⚠️ Portfolio in Progress</h2>
+      <p>This isn’t a polished showcase. It’s a glimpse into something being quietly built — without performance, without noise.</p>
+      <div class="carousel-quote" id="quoteBox">"Truth offends the fake — every single time."</div>
+    </div>
+
+    <div class="card">
+      <h3>Where I’m Loud (Sometimes):</h3>
+      <div class="socials">
+        <a href="https://github.com/AryanNeupane" target="_blank">GitHub</a>
+        <a href="https://substack.com/@aryanneupane" target="_blank">Substack</a>
+        <a href="https://www.linkedin.com/in/aryanneupane/" target="_blank">LinkedIn</a>
+        <a href="https://x.com/AryanNe2060" target="_blank">Twitter/X</a>
+        <a href="https://www.facebook.com/aryan.neupane.312478" target="_blank">Facebook</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    &copy; <span id="year"></span> Aryan Neupane<br/>
+    “Building in silence. Creating with intention.”
+  </footer>
+
+  <script>
+    // Typing animation
+    const phrases = [
+      "Learning. Unlearning. Evolving.",
+      "I don't post to impress — I post to express.",
+      "Philosophy, sarcasm & silence: my three weapons.",
+      "This portfolio is under construction. So am I."
+    ];
+    let i = 0, j = 0, currentPhrase = [], isDeleting = false;
+    const typewriter = document.getElementById("typewriter");
+
+    function loop() {
+      typewriter.innerHTML = currentPhrase.join('');
+      if (!isDeleting && j <= phrases[i].length) {
+        currentPhrase.push(phrases[i][j]);
+        j++;
+        setTimeout(loop, 80);
+      } else if (isDeleting && j > 0) {
+        currentPhrase.pop();
+        j--;
+        setTimeout(loop, 50);
+      } else if (!isDeleting && j > phrases[i].length) {
+        isDeleting = true;
+        setTimeout(loop, 1500);
+      } else if (isDeleting && j === 0) {
+        isDeleting = false;
+        i = (i + 1) % phrases.length;
+        setTimeout(loop, 300);
+      }
+    }
+    loop();
+
+    // Rotating quotes
+    const quotes = [
+      "“Truth offends the fake — every single time.”",
+      "“People don’t hate lies — they hate the truth that unmasks them.”",
+      "“Wear a mask, they’ll clap. Show your face, they’ll call it ‘too much.’”",
+      "“Honesty doesn’t make you the hero. It makes you the threat.”",
+      "“Not building for applause. Building for purpose.”"
+    ];
+    const quoteBox = document.getElementById("quoteBox");
+    let qIndex = 0;
+
+    setInterval(() => {
+      qIndex = (qIndex + 1) % quotes.length;
+      quoteBox.style.opacity = 0;
+      setTimeout(() => {
+        quoteBox.innerText = quotes[qIndex];
+        quoteBox.style.opacity = 1;
+      }, 400);
+    }, 5000);
+
+    // Footer year
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+
 </body>
 </html>
