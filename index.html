@@ -1,98 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aryan Neupane | Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aryan Neupane — Portfolio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #0e0e0e;
-      color: #f4f4f4;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 2rem;
-      text-align: center;
-    }
+  /* Reset */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #121212;
+    color: #ddd;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      font-weight: 700;
-    }
+  body {
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+  }
 
-    p {
-      font-size: 1.1rem;
-      margin: 0.5rem 0;
-      max-width: 650px;
-    }
+  main {
+    max-width: 640px;
+    width: 100%;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease forwards;
+  }
 
-    .highlight {
-      color: #ff5252;
-      font-weight: bold;
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
+  }
 
-    .links {
-      margin-top: 2rem;
-      display: flex;
+  .quote {
+    color: #5dd9f3;
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    letter-spacing: 0.04em;
+    user-select: none;
+  }
+
+  h1 {
+    font-weight: 900;
+    font-size: 2.6rem;
+    margin-bottom: 0.3rem;
+    color: #61dafb;
+    letter-spacing: 0.05em;
+    user-select: text;
+  }
+
+  .intro {
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.15rem;
+    color: #bbb;
+    margin-bottom: 2rem;
+    line-height: 1.4;
+  }
+
+  p {
+    margin: 1rem 0;
+    font-size: 1.1rem;
+    color: #ccc;
+    line-height: 1.5;
+  }
+
+  .emphasis {
+    font-style: italic;
+    color: #888;
+    margin-top: 2rem;
+    user-select: none;
+  }
+
+  .contact {
+    margin-top: 2rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  a.email {
+    color: #61dafb;
+    text-decoration: none;
+    font-weight: 900;
+    transition: color 0.3s ease;
+  }
+  a.email:hover,
+  a.email:focus {
+    color: #5dd9f3;
+    outline: none;
+  }
+
+  nav.social-links {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 2rem;
+  }
+
+  a.social-link {
+    color: #aaa;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+    user-select: none;
+    white-space: nowrap;
+  }
+  a.social-link .icon {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    transition: transform 0.3s ease;
+  }
+  a.social-link:hover,
+  a.social-link:focus {
+    color: #5dd9f3;
+    outline: none;
+  }
+  a.social-link:hover .icon,
+  a.social-link:focus .icon {
+    transform: scale(1.2) rotate(10deg);
+  }
+
+  section#skills {
+    margin-top: 3.5rem;
+  }
+  section#skills h2 {
+    color: #61dafb;
+    font-weight: 800;
+    font-size: 1.8rem;
+    margin-bottom: 1.8rem;
+    user-select: none;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(110px,1fr));
+    gap: 1.3rem;
+    justify-items: center;
+  }
+
+  .skill-item {
+    background: #1f1f1f;
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    width: 110px;
+    box-shadow: 0 0 8px rgba(93, 217, 243, 0.15);
+    cursor: default;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    user-select: none;
+  }
+  .skill-item:hover,
+  .skill-item:focus-within {
+    box-shadow: 0 0 14px #5dd9f3;
+    transform: translateY(-6px);
+    outline: none;
+  }
+
+  .skill-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.6rem;
+    fill: currentColor;
+  }
+
+  .skill-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #ccc;
+    user-select: none;
+  }
+
+  footer {
+    margin-top: 3.5rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #555;
+    user-select: none;
+  }
+
+  @media (max-width: 400px) {
+    .skills-grid {
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
       gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
     }
-
-    .links a {
-      color: #00bcd4;
-      text-decoration: none;
-      border: 1px solid #00bcd4;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      transition: all 0.3s;
-    }
-
-    .links a:hover {
-      background: #00bcd4;
-      color: #0e0e0e;
-    }
-
-    footer {
-      margin-top: 3rem;
-      font-size: 0.9rem;
-      opacity: 0.7;
-    }
-  </style>
+  }
+</style>
 </head>
-
 <body>
-  <h1>“Not here to impress — here to disturb the ordinary.”</h1>
-  <p>I’m <span class="highlight">Aryan Neupane</span> — a work-in-progress human with a habit of asking the wrong questions, at the wrong time, to the right people.</p>
-  <p>This portfolio? Still loading... Just like most people’s self-awareness.</p>
-  <p>I write, build, unbuild, and leave things half-finished so they can breathe.</p>
-  <p>If you're here looking for shiny projects — you're early. If you're here to observe a mind at work — welcome.</p>
-  <p class="highlight">🚧 Portfolio is under construction. The chaos is intentional. 🚧</p>
-  <p>Fastest way to get a response? <strong>official.aryanneupane@gmail.com</strong></p>
+  <main role="main" aria-label="Portfolio introduction and contact">
+    <p class="quote">“Not here to impress — here to disturb the ordinary.”</p>
+    <h1>I'm Aryan Neupane</h1>
+    <p class="intro">
+      a work-in-progress human with a habit of asking the wrong questions,<br />
+      at the wrong time, to the right people.
+    </p>
 
-  <div class="links">
-    <a href="https://www.facebook.com/aryan.neupane.312478" target="_blank">Facebook</a>
-    <a href="https://github.com/AryanNeupane" target="_blank">GitHub</a>
-    <a href="https://substack.com/@aryanneupane" target="_blank">Substack</a>
-    <a href="https://www.linkedin.com/in/aryanneupane/" target="_blank">LinkedIn</a>
-    <a href="https://x.com/AryanNe2060" target="_blank">X (Twitter)</a>
+    <p>This portfolio? Still loading... Just like most people’s self-awareness.</p>
+    <p>I write, build, unbuild, and leave things half-finished so they can breathe.</p>
+    <p>
+      If you're here looking for shiny projects — you're early.<br />
+      If you're here to observe a mind at work — welcome.
+    </p>
+
+    <p class="emphasis">🚧 Portfolio is under construction. The chaos is intentional. 🚧</p>
+
+    <p class="contact">
+      Fastest way to get a response? <br />
+      <a href="mailto:official.aryanneupane@gmail.com" class="email" aria-label="Send email to Aryan Neupane">
+        official.aryanneupane@gmail.com
+      </a>
+    </p>
+
+    <nav class="social-links" aria-label="Social media links">
+      <a href="https://www.facebook.com/aryan.neupane.312478" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="social-link">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 12c0-5.522-4.477-10-10-10S2 6.478 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.988h-2.54v-2.89h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562v1.875h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+        Facebook
+      </a>
+      <a href="https://github.com/AryanNeupane" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="social-link">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.09.682-.217.682-.482 0-.237-.008-.868-.013-1.703-2.782.603-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.004.07 1.532 1.031 1.532 1.031.893 1.53 2.341 1.088 2.91.832.09-.647.349-1.088.635-1.338-2.22-.253-4.555-1.112-4.555-4.945 0-1.092.39-1.985 1.029-2.683-.103-.253-.446-1.272.098-2.65 0 0 .84-.269 2.75 1.026A9.565 9.565 0 0112 6.844c.85.004 1.705.115 2.504.337 1.91-1.296 2.75-1.026 2.75-1.026.546 1.378.202 2.397.1 2.65.64.698 1.028 1.591 1.028 2.683 0 3.842-2.337 4.688-4.566 4.936.36.311.682.924.682 1.862 0 1.344-.012 2.427-.012 2.757 0 .268.18.577.688.48A10.013 10.013 0 0022 12c0-5.523-4.477-10-10-10z"/></svg>
+        GitHub
+      </a>
+      <a href="https://substack.com/@aryanneupane" target="_blank" rel="noopener noreferrer" aria-label="Substack" class="social-link">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 3h2v18H2V3zm5 0h2v18H7V3zm5 0h9v18h-9V3z"/></svg>
+        Substack
+      </a>
+      <a href="https://www.linkedin.com/in/aryanneupane/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="social-link">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.983 3.5c0 1.381-1.114 2.5-2.483 2.5S0 4.881 0 3.5 1.114 1 2.5 1s2.483 1.119 2.483 2.5zM.24 8.514h4.5v14.986h-4.5V8.514zm7.383 0h4.315v2.047h.061c.6-1.138 2.068-2.34 4.26-2.34 4.557 0 5.404 3 5.404 6.89v7.675h-4.5v-6.79c0-1.62-.03-3.705-2.26-3.705-2.26 0-2.605 1.765-2.605 3.59v6.906h-4.5V8.514z"/></svg>
+        LinkedIn
+      </a>
+      <a href="https://x.com/AryanNe2060" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" class="social-link">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.897-.959-2.178-1.559-3.594-1.559-2.725 0-4.934 2.209-4.934 4.934 0 .39.045.765.127 1.124-4.1-.205-7.732-2.17-10.163-5.144-.424.724-.666 1.562-.666 2.458 0 1.698.865 3.197 2.188 4.078-.803-.025-1.56-.246-2.228-.616v.062c0 2.374 1.688 4.352 3.928 4.796-.411.11-.844.169-1.291.169-.316 0-.624-.03-.923-.086.625 1.956 2.444 3.376 4.6 3.417-1.685 1.32-3.808 2.105-6.115 2.105-.398 0-.79-.023-1.17-.067 2.18 1.397 4.768 2.212 7.557 2.212 9.054 0 14-7.503 14-14 0-.214-.005-.425-.014-.636.962-.695 1.8-1.562 2.46-2.549z"/></svg>
+        X (Twitter)
+      </a>
+    </nav>
+
+    <section id="skills" aria-label="Skills" tabindex="-1">
+  <h2>Skills</h2>
+  <div class="skills-grid">
+    <!-- HTML -->
+    <div class="skill-item" title="HTML">
+      <svg class="skill-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#E34F26" d="M10 0h44l-4 44-18 5-18-5-4-44z"/>
+        <path fill="#EF652A" d="M32 58l14-4 3-34H32v38z"/>
+        <path fill="#FFF" d="M32 24h9l1-13h-10v13zM15 24h13v-13H15l-1 13z"/>
+      </svg>
+      <div class="skill-name">HTML</div>
+    </div>
+
+    <!-- CSS -->
+    <div class="skill-item" title="CSS">
+      <svg class="skill-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#1572B6" d="M10 0h44l-4 44-18 5-18-5-4-44z"/>
+        <path fill="#33A9DC" d="M32 58l14-4 3-34H32v38z"/>
+        <path fill="#FFF" d="M32 24h9l1-13h-10v13zM15 24h13v-13H15l-1 13z"/>
+      </svg>
+      <div class="skill-name">CSS</div>
+    </div>
+
+    <!-- JavaScript -->
+    <div class="skill-item" title="JavaScript">
+      <svg class="skill-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#F7DF1E" d="M2 2h60v60H2z"/>
+        <path d="M39 46c0 6-5 7-7 7-4 0-6-3-6-8h4c0 2 1 3 3 3 2 0 3-1 3-3v-6h-3v-3h6v9zm-17-2v-7h-4v14h4v-3c1 1 3 2 5 2 3 0 5-2 5-6 0-5-4-6-6-6-2 0-3 1-4 3z" fill="#000"/>
+      </svg>
+      <div class="skill-name">JavaScript</div>
+    </div>
+
+    <!-- React -->
+    <div class="skill-item" title="React">
+      <svg class="skill-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <circle fill="#61DAFB" cx="32" cy="32" r="6"/>
+        <path fill="none" stroke="#61DAFB" stroke-width="4" d="M32 12c11 0 20 8 20 20s-9 20-20 20-20-8-20-20 9-20 20-20z"/>
+        <path fill="none" stroke="#61DAFB" stroke-width="4" d="M12 32c0 11 8 20 20 20s20-9 20-20-8-20-20-20-20 9-20 20z"/>
+      </svg>
+      <div class="skill-name">React</div>
+    </div>
+
+    <!-- Node.js -->
+    <div class="skill-item" title="Node.js">
+      <svg class="skill-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#83CD29" d="M32 2l-25 14v26l25 14 25-14V16L32 2z"/>
+        <path fill="#FFF" d="M39 25l-7 4-7-4v14l7 4 7-4v-14z"/>
+      </svg>
+      <div class="skill-name">Node.js</div>
+    </div>
+
+    <!-- MongoDB -->
+    <div class="skill-item" title="MongoDB">
+      <svg class="skill-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#47A248" d="M32 2C23 9 14 23 14 34c0 16 18 28 18 28s18-12 18-28c0-11-9-25-18-32z"/>
+      </svg>
+      <div class="skill-name">MongoDB</div>
+    </div>
+
+    <!-- Express.js -->
+    <div class="skill-item" title="Express.js">
+      <svg class="skill-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <rect fill="#000" x="0" y="0" width="64" height="64" rx="8" ry="8"/>
+        <text x="32" y="40" fill="#fff" font-family="Arial" font-weight="bold" font-size="24" text-anchor="middle" alignment-baseline="middle">Ex</text>
+      </svg>
+      <div class="skill-name">Express.js</div>
+    </div>
+
+    <!-- Git -->
+    <div class="skill-item" title="Git">
+      <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 5l-8 8-4-4" />
+        <circle cx="16" cy="7" r="4" />
+        <line x1="12" y1="12" x2="16" y2="16" />
+      </svg>
+      <div class="skill-name">Git</div>
+    </div>
+
+    <!-- REST APIs -->
+    <div class="skill-item" title="REST APIs">
+      <svg class="skill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <path d="M3 9h18"/>
+        <path d="M9 21V9"/>
+      </svg>
+      <div class="skill-name">REST APIs</div>
+    </div>
+
+    <!-- TypeScript -->
+    <div class="skill-item" title="TypeScript">
+      <svg class="skill-icon" viewBox="0 0 24 24" fill="#3178C6" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7v10l10 5 10-5V7l-10-5z" fill="#3178C6"/>
+        <path fill="#fff" d="M9 16v-1h6v1H9zm6-6h-2v4h2v2h-6v-2h2v-4H9v-2h6v2z"/>
+      </svg>
+      <div class="skill-name">TypeScript</div>
+    </div>
   </div>
+</section>
 
-  <footer>
-    <p>Truth > Trends. Depth > Hype. | © Aryan Neupane</p>
-  </footer>
+
+    <footer>
+      Truth &gt; Trends. Depth &gt; Hype. | © Aryan Neupane
+    </footer>
+  </main>
 </body>
-
 </html>
