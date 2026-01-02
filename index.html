@@ -1,1502 +1,714 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aryan Neupane </title>
-
+    
     <!-- SEO Meta Tags -->
-    <meta name="description"
-        content="Aryan Neupane – Observing, Absorbing, Outgrowing. Personal portfolio showcasing MERN stack projects, JavaScript and Python skills, articles, and creative insights.">
-    <meta name="keywords"
-        content="Aryan Neupane, Portfolio, MERN Stack, JavaScript, Python, Web Developer, Projects, Blog, Articles, Personal Website">
+    <title>Aryan Neupane</title>
+    <meta name="description" content="Aryan Neupane's portfolio. Observing, absorbing, outgrowing. Explore the evolving digital presence of Aryan Neupane.">
+    <meta name="keywords" content="Aryan Neupane, Aryan, Neupane Aryan, Aryan portfolio, Aryan Neupane portfolio, digital portfolio">
     <meta name="author" content="Aryan Neupane">
-    <link rel="canonical" href="https://aryanneupane.com/">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:title" content="Aryan Neupane | Personal Portfolio">
-    <meta property="og:description"
-        content="Explore Aryan Neupane's portfolio, projects, articles, and skills in MERN Stack, JavaScript, and Python.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://aryanneupane.com.np">
+    
+    <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://aryanneupane.com/">
-    <meta property="og:image" content="https://aryanneupane.com/og-image.png">
-
+    <meta property="og:url" content="https://aryanneupane.com.np">
+    <meta property="og:title" content="Aryan Neupane | Still Becoming">
+    <meta property="og:description" content="The evolving digital presence of Aryan Neupane. Observing. Absorbing. Outgrowing.">
+    <meta property="og:site_name" content="Aryan Neupane">
+    
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Aryan Neupane | Personal Portfolio">
-    <meta name="twitter:description"
-        content="Explore Aryan Neupane's portfolio, projects, articles, and skills in MERN Stack, JavaScript, and Python.">
-    <meta name="twitter:image" content="https://aryanneupane.com/twitter-image.png">
-
-    <!-- Preconnect Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&family=Inter:wght@200;300;400;500;600;700;900&display=swap"
-        rel="stylesheet">
-
-
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&family=Inter:wght@200;300;400;500;600;700;900&display=swap"
-        rel="stylesheet">
+    <meta name="twitter:title" content="Aryan Neupane | Still Becoming">
+    <meta name="twitter:description" content="The evolving digital presence of Aryan Neupane">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Aryan Neupane",
+      "alternateName": ["Aryan", "Neupane Aryan"],
+      "url": "https://aryanneupane.com.np",
+      "email": ["contact@aryanneupane.com.np", "email@aryanneupane.com"],
+      "sameAs": []
+    }
+    </script>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root {
-            --void: #000000;
-            --deep-space: #0a0a0a;
-            --quantum-green: #00ff41;
-            --plasma-pink: #ff006e;
-            --electric-blue: #0066ff;
-            --cyber-purple: #8b00ff;
-            --ghost-white: #ffffff;
-            --phantom-gray: #333333;
-            --whisper: #666666;
-            --shadow: #111111;
-            --glow-intense: rgba(0, 255, 65, 0.8);
-            --glow-soft: rgba(0, 255, 65, 0.2);
-        }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        html {
-            scroll-behavior: smooth;
-            cursor: none;
-            overflow-x: hidden;
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--void);
-            color: var(--ghost-white);
+            font-family: 'Courier New', monospace;
+            background: #0a0a0f;
+            color: #e8e8e8;
             overflow-x: hidden;
             position: relative;
             min-height: 100vh;
         }
 
-        /* INSANE CURSOR SYSTEM */
-        .cursor-main {
-            position: fixed;
-            width: 20px;
-            height: 20px;
-            background: var(--quantum-green);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 10000;
-            mix-blend-mode: screen;
-            transition: all 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 0 20px var(--glow-intense);
-        }
-
-        .cursor-trail {
-            position: fixed;
-            width: 8px;
-            height: 8px;
-            background: var(--plasma-pink);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.7;
-            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-
-        .cursor-orbit {
-            position: fixed;
-            width: 40px;
-            height: 40px;
-            border: 1px solid var(--quantum-green);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9998;
-            opacity: 0.3;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            animation: pulse-orbit 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-orbit {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 0.3;
-            }
-
-            50% {
-                transform: scale(1.2);
-                opacity: 0.1;
-            }
-        }
-
-        /* NEURAL NETWORK BACKGROUND */
-        .neural-network {
+        #particles {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
-            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
         }
 
-        .neural-node {
+        .particle {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: var(--quantum-green);
+            background: rgba(136, 176, 255, 0.6);
             border-radius: 50%;
-            opacity: 0.6;
-            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
         }
 
-        .neural-connection {
-            position: absolute;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--quantum-green), transparent);
-            opacity: 0.2;
-            animation: pulse-connection 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px) translateX(0px);
-            }
-
-            25% {
-                transform: translateY(-20px) translateX(10px);
-            }
-
-            50% {
-                transform: translateY(10px) translateX(-15px);
-            }
-
-            75% {
-                transform: translateY(-5px) translateX(20px);
-            }
-        }
-
-        @keyframes pulse-connection {
-
-            0%,
-            100% {
-                opacity: 0.1;
-            }
-
-            50% {
-                opacity: 0.3;
-            }
-        }
-
-        .scanlines {
+        #ambient-grid {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
-            background: linear-gradient(transparent 50%, rgba(0, 255, 65, 0.03) 50%);
-            background-size: 100% 4px;
-            animation: scan 0.1s linear infinite;
+            opacity: 0.03;
+            z-index: 2;
+            pointer-events: none;
+            background-image: 
+                linear-gradient(rgba(88, 166, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(88, 166, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridDrift 60s linear infinite;
         }
 
-        @keyframes scan {
-            0% {
-                transform: translateY(0);
-            }
-
-            100% {
-                transform: translateY(4px);
-            }
+        @keyframes gridDrift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* MIND-BLOWING HEADER */
-        .header {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
+        #cursor-glow {
+            position: fixed;
             width: 300px;
             height: 300px;
-            background: radial-gradient(circle, var(--glow-soft), transparent);
-            transform: translate(-50%, -50%);
-            animation: breathe 4s ease-in-out infinite;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(138, 93, 255, 0.15) 0%, rgba(88, 166, 255, 0.08) 40%, transparent 70%);
+            pointer-events: none;
+            z-index: 3;
+            mix-blend-mode: screen;
+            transition: opacity 0.3s;
         }
 
-        @keyframes breathe {
-
-            0%,
-            100% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 0.3;
-            }
-
-            50% {
-                transform: translate(-50%, -50%) scale(1.5);
-                opacity: 0.1;
-            }
-        }
-
-        .header-content {
-            text-align: center;
+        .content {
             position: relative;
-            z-index: 2;
+            z-index: 10;
+            min-height: 100vh;
         }
 
-        .name-container {
-            position: relative;
+        #boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0f;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 1.2s ease;
+        }
+
+        #boot-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .boot-text {
+            color: #58a6ff;
+            font-size: 0.85rem;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px rgba(88, 166, 255, 0.6);
             margin-bottom: 2rem;
         }
 
-        .main-name {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: clamp(3rem, 10vw, 8rem);
-            font-weight: 800;
-            background: linear-gradient(45deg,
-                    var(--quantum-green) 0%,
-                    var(--electric-blue) 25%,
-                    var(--plasma-pink) 50%,
-                    var(--cyber-purple) 75%,
-                    var(--quantum-green) 100%);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: rainbow-shift 3s ease-in-out infinite;
-            text-shadow: 0 0 50px var(--glow-intense);
-            letter-spacing: -0.05em;
-            line-height: 0.9;
+        .boot-progress {
+            width: 300px;
+            height: 2px;
+            background: rgba(88, 166, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
         }
 
-        @keyframes rainbow-shift {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-        }
-
-        .glitch-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+        .boot-progress-bar {
             height: 100%;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: clamp(3rem, 10vw, 8rem);
-            font-weight: 800;
+            background: linear-gradient(90deg, #58a6ff, #8a5dff);
+            width: 0%;
+            animation: bootProgress 1s ease-out forwards;
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.8);
+        }
+
+        @keyframes bootProgress {
+            to { width: 100%; }
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
             opacity: 0;
-            pointer-events: none;
+            transition: opacity 1.5s ease;
         }
 
-        .glitch-layer:nth-child(2) {
-            color: var(--plasma-pink);
-            animation: glitch-1 0.3s infinite linear alternate-reverse;
+        .hero.visible {
+            opacity: 1;
         }
 
-        .glitch-layer:nth-child(3) {
-            color: var(--electric-blue);
-            animation: glitch-2 0.3s infinite linear alternate-reverse;
+        .hero h1 {
+            font-size: clamp(2.5rem, 9vw, 6rem);
+            font-weight: 200;
+            margin-bottom: 1.5rem;
+            color: #f0f0f0;
+            text-shadow: 0 0 40px rgba(136, 176, 255, 0.15);
+            letter-spacing: -1px;
         }
 
-        @keyframes glitch-1 {
-            0% {
-                transform: translate(0);
-                opacity: 0;
-            }
-
-            10% {
-                transform: translate(-2px, -2px);
-                opacity: 0.7;
-            }
-
-            20% {
-                transform: translate(-2px, -2px);
-                opacity: 0;
-            }
-
-            30% {
-                transform: translate(2px, 2px);
-                opacity: 0.7;
-            }
-
-            40% {
-                transform: translate(2px, 2px);
-                opacity: 0;
-            }
-
-            50% {
-                transform: translate(-1px, 1px);
-                opacity: 0.7;
-            }
-
-            60% {
-                transform: translate(-1px, 1px);
-                opacity: 0;
-            }
-
-            70% {
-                transform: translate(1px, -1px);
-                opacity: 0.7;
-            }
-
-            80% {
-                transform: translate(1px, -1px);
-                opacity: 0;
-            }
-
-            90% {
-                transform: translate(-2px, 2px);
-                opacity: 0.7;
-            }
-
-            100% {
-                transform: translate(-2px, 2px);
-                opacity: 0;
-            }
-        }
-
-        @keyframes glitch-2 {
-            0% {
-                transform: translate(0);
-                opacity: 0;
-            }
-
-            15% {
-                transform: translate(2px, -2px);
-                opacity: 0.5;
-            }
-
-            25% {
-                transform: translate(2px, -2px);
-                opacity: 0;
-            }
-
-            35% {
-                transform: translate(-2px, 2px);
-                opacity: 0.5;
-            }
-
-            45% {
-                transform: translate(-2px, 2px);
-                opacity: 0;
-            }
-
-            55% {
-                transform: translate(1px, -1px);
-                opacity: 0.5;
-            }
-
-            65% {
-                transform: translate(1px, -1px);
-                opacity: 0;
-            }
-
-            75% {
-                transform: translate(-1px, 1px);
-                opacity: 0.5;
-            }
-
-            85% {
-                transform: translate(-1px, 1px);
-                opacity: 0;
-            }
-
-            95% {
-                transform: translate(2px, 2px);
-                opacity: 0.5;
-            }
-
-            100% {
-                transform: translate(2px, 2px);
-                opacity: 0;
-            }
-        }
-
-        .subtitle-matrix {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: clamp(1rem, 3vw, 1.8rem);
-            font-weight: 300;
-            letter-spacing: 0.3em;
+        .hero .subtext {
+            font-size: clamp(0.95rem, 2.2vw, 1.4rem);
+            letter-spacing: 10px;
+            color: #b8b8b8;
+            font-weight: 200;
             text-transform: uppercase;
-            color: var(--whisper);
             position: relative;
-            margin-top: 3rem;
+            padding: 0 2rem;
         }
 
-        .subtitle-matrix::before,
-        .subtitle-matrix::after {
+        .hero .subtext::before,
+        .hero .subtext::after {
             content: '';
             position: absolute;
             top: 50%;
-            width: 150px;
+            width: 50px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--quantum-green), transparent);
-            animation: line-glow 2s ease-in-out infinite alternate;
+            background: linear-gradient(90deg, transparent, rgba(88, 166, 255, 0.4));
         }
 
-        .subtitle-matrix::before {
-            left: -180px;
+        .hero .subtext::before {
+            left: 0;
         }
 
-        .subtitle-matrix::after {
-            right: -180px;
+        .hero .subtext::after {
+            right: 0;
+            background: linear-gradient(270deg, transparent, rgba(88, 166, 255, 0.4));
         }
 
-        @keyframes line-glow {
-            0% {
-                opacity: 0.3;
-                transform: scaleX(1);
-            }
-
-            100% {
-                opacity: 1;
-                transform: scaleX(1.2);
-            }
-        }
-
-        /* QUANTUM TERMINAL */
-        .quantum-terminal {
-            margin: 6rem 0;
-            position: relative;
-        }
-
-        .terminal-container {
-            background: linear-gradient(135deg, var(--shadow), var(--deep-space));
-            border-radius: 20px;
-            border: 2px solid var(--quantum-green);
-            box-shadow:
-                0 0 50px rgba(0, 255, 65, 0.3),
-                inset 0 0 50px rgba(0, 255, 65, 0.1);
-            overflow: hidden;
-            max-width: 900px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .terminal-container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, var(--quantum-green), transparent);
-            animation: rotate-border 4s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes rotate-border {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .terminal-header {
-            background: var(--quantum-green);
-            color: var(--void);
-            padding: 1rem 2rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .construction-banner {
+            margin: 4rem auto;
+            max-width: 750px;
+            padding: 2.5rem 3rem;
+            background: rgba(20, 20, 30, 0.7);
+            border: 1px solid rgba(88, 166, 255, 0.25);
+            border-radius: 6px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1.2s ease, transform 1.2s ease;
+            animation: pulseGlow 5s ease-in-out infinite;
             position: relative;
             overflow: hidden;
         }
 
-        .terminal-header::before {
+        .construction-banner::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            animation: shine 3s infinite;
+            background: linear-gradient(90deg, transparent, rgba(88, 166, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
         }
 
-        @keyframes shine {
-            0% {
-                left: -100%;
+        @keyframes shimmer {
+            to { left: 100%; }
+        }
+
+        .construction-banner.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(88, 166, 255, 0.15), inset 0 0 20px rgba(88, 166, 255, 0.05);
             }
-
-            100% {
-                left: 100%;
+            50% {
+                box-shadow: 0 0 50px rgba(138, 93, 255, 0.35), inset 0 0 30px rgba(138, 93, 255, 0.1);
             }
         }
 
-        .terminal-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .control-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
+        .construction-banner p {
+            margin: 0;
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
+            color: #d8d8d8;
+            letter-spacing: 1.5px;
             position: relative;
-            overflow: hidden;
+            z-index: 1;
         }
 
-        .control-dot::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            right: 2px;
-            bottom: 2px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .dot-close {
-            background: #ff5f56;
-        }
-
-        .dot-minimize {
-            background: #ffbd2e;
-        }
-
-        .dot-maximize {
-            background: #27ca3f;
-        }
-
-        .terminal-body {
-            padding: 3rem;
-            font-family: 'JetBrains Mono', monospace;
-            position: relative;
-            min-height: 200px;
-            background: var(--void);
-        }
-
-        .code-line {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
+        .philosophical {
+            text-align: center;
+            margin: 6rem 0;
+            padding: 0 2rem;
             opacity: 0;
-            transform: translateX(-20px);
-            animation: type-in 0.8s ease-out forwards;
+            transform: translateY(30px);
+            transition: opacity 1.2s ease, transform 1.2s ease;
         }
 
-        .line-number {
-            color: var(--whisper);
-            margin-right: 2rem;
-            min-width: 30px;
-            text-align: right;
-            user-select: none;
+        .philosophical.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .prompt {
-            color: var(--quantum-green);
-            margin-right: 10px;
-            font-weight: 700;
+        .philosophical p {
+            font-size: clamp(1.1rem, 2.3vw, 1.4rem);
+            color: #9a9a9a;
+            letter-spacing: 3px;
+            font-weight: 200;
+            line-height: 2;
         }
 
-        .code-text {
-            color: var(--ghost-white);
-            line-height: 1.6;
-            flex: 1;
-            font-size: 1.1rem;
-        }
-
-        .cursor-block {
-            display: inline-block;
-            width: 12px;
-            height: 24px;
-            background: var(--quantum-green);
-            animation: cursor-blink 1s infinite step-end;
-            margin-left: 5px;
-        }
-
-        @keyframes cursor-blink {
-
-            0%,
-            50% {
-                opacity: 1;
-            }
-
-            51%,
-            100% {
-                opacity: 0;
-            }
-        }
-
-        @keyframes type-in {
-            0% {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .construction-alert {
+        .time-aware {
             text-align: center;
-            margin-top: 4rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.3rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, var(--plasma-pink), var(--electric-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: pulse-text 2s ease-in-out infinite;
-            text-shadow: 0 0 30px var(--glow-soft);
+            margin: 3rem 0 2rem;
+            padding: 0 2rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1.2s ease, transform 1.2s ease;
         }
 
-        @keyframes pulse-text {
-
-            0%,
-            100% {
-                opacity: 0.8;
-                transform: scale(1);
-            }
-
-            50% {
-                opacity: 1;
-                transform: scale(1.05);
-            }
+        .time-aware.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        /* HOLOGRAPHIC SECTIONS */
-        .holo-section {
-            margin: 8rem 0;
-            position: relative;
+        .time-aware p {
+            font-size: 0.95rem;
+            color: #6a7a8a;
+            letter-spacing: 2px;
+            font-weight: 200;
+            font-style: italic;
         }
 
-        .section-title {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            font-weight: 700;
+        .contact {
             text-align: center;
-            margin-bottom: 4rem;
-            position: relative;
-            background: linear-gradient(45deg, var(--quantum-green), var(--ghost-white));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            padding: 4rem 2rem 3rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1.2s ease, transform 1.2s ease;
         }
 
-        .section-title::after {
+        .contact.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .contact a {
+            display: block;
+            color: #88b6ff;
+            text-decoration: none;
+            margin: 1rem 0;
+            font-size: clamp(1rem, 2.2vw, 1.15rem);
+            letter-spacing: 1.5px;
+            transition: all 0.4s ease;
+            position: relative;
+            padding: 0.5rem;
+        }
+
+        .contact a::after {
             content: '';
             position: absolute;
-            bottom: -20px;
+            bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--quantum-green), var(--plasma-pink));
-            border-radius: 2px;
-            animation: expand-line 1s ease-out;
+            width: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #88b6ff, transparent);
+            transition: width 0.4s ease;
         }
 
-        @keyframes expand-line {
-            0% {
-                width: 0;
-            }
-
-            100% {
-                width: 100px;
-            }
+        .contact a:hover {
+            color: #b8d6ff;
+            text-shadow: 0 0 20px rgba(136, 182, 255, 0.7);
+            transform: translateY(-2px);
         }
 
-        /* CYBER SKILLS */
-        .skills-matrix-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 200px;
-            position: relative;
+        .contact a:hover::after {
+            width: 100%;
         }
 
-        .skills-orb {
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, var(--quantum-green), transparent);
-            border: 3px solid var(--quantum-green);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            animation: rotate-orb 10s linear infinite;
-            box-shadow:
-                0 0 50px var(--glow-soft),
-                inset 0 0 50px var(--glow-soft);
-        }
-
-        .skills-orb::before,
-        .skills-orb::after {
-            content: '';
-            position: absolute;
-            border-radius: 50%;
-            border: 1px solid var(--quantum-green);
-            opacity: 0.3;
-        }
-
-        .skills-orb::before {
-            width: 350px;
-            height: 350px;
-            animation: rotate-orb 8s linear infinite reverse;
-        }
-
-        .skills-orb::after {
-            width: 400px;
-            height: 400px;
-            animation: rotate-orb 12s linear infinite;
-        }
-
-        @keyframes rotate-orb {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .skills-text {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--ghost-white);
-            text-align: center;
-            line-height: 1.4;
-            z-index: 2;
-        }
-
-        /* DIMENSIONAL CARDS */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 3rem;
-            margin-top: 4rem;
-            perspective: 1000px;
-        }
-
-        .dimension-card {
-            background: linear-gradient(135deg,
-                    rgba(0, 255, 65, 0.1),
-                    rgba(255, 0, 110, 0.1));
-            border: 1px solid var(--phantom-gray);
-            border-radius: 20px;
-            padding: 2.5rem;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-            transform-style: preserve-3d;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-        }
-
-        .dimension-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg,
-                    var(--quantum-green),
-                    var(--plasma-pink),
-                    var(--electric-blue));
+        #secret-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #58a6ff;
+            font-size: 0.9rem;
+            letter-spacing: 3px;
             opacity: 0;
             transition: opacity 0.6s ease;
-            z-index: -1;
-            filter: blur(20px);
+            z-index: 100;
+            pointer-events: none;
+            text-shadow: 0 0 15px rgba(88, 166, 255, 0.6);
+            padding: 0.8rem 2rem;
+            border: 1px solid rgba(88, 166, 255, 0.2);
+            background: rgba(10, 10, 15, 0.9);
+            border-radius: 4px;
         }
 
-        .dimension-card:hover {
-            transform: rotateX(10deg) rotateY(10deg) translateY(-20px) scale(1.05);
-            border-color: var(--quantum-green);
-            box-shadow:
-                0 25px 80px rgba(0, 255, 65, 0.3),
-                0 0 50px rgba(0, 255, 65, 0.2);
+        #secret-message.show {
+            opacity: 1;
         }
 
-        .dimension-card:hover::before {
-            opacity: 0.1;
-        }
-
-        .card-content {
-            position: relative;
-            z-index: 2;
-            text-align: center;
-        }
-
-        .card-link {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--quantum-green);
-            text-decoration: none;
-            display: block;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .card-link::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--quantum-green);
-            transition: width 0.3s ease;
-        }
-
-        .card-link:hover::after {
-            width: 100%;
-        }
-
-        .card-description {
-            color: var(--whisper);
-            font-style: italic;
-            margin-top: 1rem;
-        }
-
-        /* NEURAL CONTACT */
-        .contact-neural {
-            text-align: center;
-            margin: 8rem 0;
-            position: relative;
-        }
-
-        .neural-email {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: clamp(1.2rem, 3vw, 2rem);
-            font-weight: 600;
-            background: linear-gradient(45deg,
-                    var(--quantum-green),
-                    var(--electric-blue),
-                    var(--plasma-pink));
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: color-wave 4s ease-in-out infinite;
-            margin-bottom: 4rem;
-            text-shadow: 0 0 30px var(--glow-soft);
-        }
-
-        @keyframes color-wave {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-        }
-
-        .social-constellation {
-            display: flex;
-            justify-content: center;
-            gap: 3rem;
-            flex-wrap: wrap;
-            margin-top: 3rem;
-        }
-
-        .social-portal {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            color: var(--ghost-white);
-            text-decoration: none;
-            padding: 1.5rem 3rem;
-            border: 2px solid transparent;
-            border-radius: 50px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            background: linear-gradient(var(--void), var(--void)) padding-box,
-                linear-gradient(45deg, var(--quantum-green), var(--plasma-pink), var(--electric-blue)) border-box;
-            transform-style: preserve-3d;
-        }
-
-        .social-portal::before {
-            content: '';
-            position: absolute;
+        .noise-overlay {
+            position: fixed;
             top: 0;
-            left: -100%;
+            left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg,
-                    transparent,
-                    rgba(255, 255, 255, 0.1),
-                    transparent);
-            transition: left 0.6s ease;
+            pointer-events: none;
+            z-index: 4;
+            opacity: 0.02;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3.5' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            animation: noiseAnim 0.2s steps(10) infinite;
         }
 
-        .social-portal:hover::before {
-            left: 100%;
+        @keyframes noiseAnim {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -5%); }
+            20% { transform: translate(-10%, 5%); }
+            30% { transform: translate(5%, -10%); }
+            40% { transform: translate(-5%, 15%); }
+            50% { transform: translate(-10%, 5%); }
+            60% { transform: translate(15%, 0); }
+            70% { transform: translate(0, 10%); }
+            80% { transform: translate(-15%, 0); }
+            90% { transform: translate(10%, 5%); }
         }
 
-        .social-portal:hover {
-            transform: translateY(-10px) scale(1.1) rotateX(15deg);
-            color: var(--quantum-green);
-            box-shadow:
-                0 20px 40px rgba(0, 255, 65, 0.4),
-                0 0 50px rgba(0, 255, 65, 0.2);
-        }
-
-        /* QUANTUM FOOTER */
-        .quantum-footer {
-            margin-top: 8rem;
-            padding: 4rem 0;
-            text-align: center;
-            border-top: 1px solid var(--phantom-gray);
-            position: relative;
-            background: linear-gradient(135deg, var(--void), var(--deep-space));
-        }
-
-        .quantum-footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg,
-                    transparent,
-                    var(--quantum-green),
-                    var(--plasma-pink),
-                    var(--electric-blue),
-                    transparent);
-            animation: border-flow 3s linear infinite;
-        }
-
-        @keyframes border-flow {
-            0% {
-                transform: translateX(-100%);
-            }
-
-            100% {
-                transform: translateX(100%);
-            }
-        }
-
-        .footer-text {
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--whisper);
-            font-size: 0.9rem;
-            letter-spacing: 0.1em;
-        }
-
-        /* RESPONSIVE QUANTUM */
         @media (max-width: 768px) {
-            html {
-                cursor: auto;
+            .hero .subtext {
+                letter-spacing: 5px;
             }
-
-            .cursor-main,
-            .cursor-trail,
-            .cursor-orbit {
-                display: none;
+            .hero .subtext::before,
+            .hero .subtext::after {
+                width: 30px;
             }
-
-            .subtitle-matrix::before,
-            .subtitle-matrix::after {
-                width: 80px;
+            .construction-banner {
+                padding: 2rem 1.5rem;
             }
-
-            .subtitle-matrix::before {
-                left: -100px;
-            }
-
-            .subtitle-matrix::after {
-                right: -100px;
-            }
-
-            .cards-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-
-            .social-constellation {
-                flex-direction: column;
-                align-items: center;
-                gap: 2rem;
-            }
-
-            .social-portal {
-                width: 250px;
-            }
-
-            .skills-orb {
-                width: 250px;
-                height: 250px;
-            }
-
-            .terminal-body {
-                padding: 2rem;
+            #cursor-glow {
+                width: 200px;
+                height: 200px;
             }
         }
 
-        @media (max-width: 480px) {
-            .terminal-container {
-                margin: 0 10px;
-            }
-
-            .dimension-card {
-                padding: 1.5rem;
-            }
-
-            .neural-email {
-                font-size: 1.2rem;
-            }
+        /* Smooth performance hint */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
     </style>
 </head>
-
 <body>
-    <!-- QUANTUM CURSOR SYSTEM -->
-    <div class="cursor-main"></div>
-    <div class="cursor-trail"></div>
-    <div class="cursor-orbit"></div>
+    <div id="boot-screen">
+        <div class="boot-text">INITIALIZING SYSTEM...</div>
+        <div class="boot-progress">
+            <div class="boot-progress-bar"></div>
+        </div>
+    </div>
 
-    <!-- NEURAL NETWORK BACKGROUND -->
-    <div class="neural-network" id="neuralNet"></div>
-    <div class="scanlines"></div>
+    <canvas id="particles"></canvas>
+    <div id="ambient-grid"></div>
+    <div id="cursor-glow"></div>
+    <div class="noise-overlay"></div>
 
-    <!-- QUANTUM HEADER -->
-    <header class="header">
+    <main class="content">
+        <section class="hero">
+            <h1>Hey, I'm Aryan Neupane</h1>
+            <p class="subtext">Observing | Absorbing | Outgrowing</p>
+        </section>
+
         <div class="container">
-            <div class="header-content">
-                <div class="name-container">
-                    <h1 class="main-name">Hey, I'm Aryan Neupane</h1>
-                    <div class="glitch-layer">Hey, I'm Aryan Neupane</div>
-                    <div class="glitch-layer">Hey, I'm Aryan Neupane</div>
-                </div>
-                <p class="subtitle-matrix">Observing | Absorbing | Outgrowing</p>
+            <div class="construction-banner">
+                <p>⚠️ Portfolio still under construction — come back later for the magic.</p>
             </div>
-        </div>
-    </header>
 
-    <!-- QUANTUM TERMINAL -->
-    <section class="quantum-terminal">
-        <div class="container">
-            <div class="terminal-container">
-                <div class="terminal-header">
-                    <div class="terminal-controls">
-                        <div class="control-dot dot-close"></div>
-                        <div class="control-dot dot-minimize"></div>
-                        <div class="control-dot dot-maximize"></div>
-                    </div>
-                    <span>aryan@neural-network:~$ cat thoughts.txt</span>
-                </div>
-                <div class="terminal-body" id="terminalBody">
-                    <div class="code-line">
-                        <span class="line-number">01</span>
-                        <span class="prompt">></span>
-                        <span class="code-text">write, build, unbuild, and leave things half-finished so they can
-                            breathe.</span>
-                        <span class="cursor-block"></span>
-                    </div>
-                </div>
+            <article class="philosophical">
+                <p>Still building. Still becoming.</p>
+            </article>
+
+            <div class="time-aware">
+                <p id="time-message"></p>
             </div>
-            <p class="construction-alert">Portfolio still under construction.</p>
-        </div>
-    </section>
 
-    <!-- SIMPLE SKILLS -->
-    <section class="holo-section">
-        <div class="container">
-            <h2 class="section-title">Skills</h2>
-            <div class="skills-container">
-                <div class="skills-text">MERN Stack, JavaScript, Python</div>
-            </div>
+            <footer class="contact">
+                <a href="mailto:contact@aryanneupane.com.np" aria-label="Email Aryan Neupane">contact@aryanneupane.com.np</a>
+                <a href="mailto:email@aryanneupane.com" aria-label="Alternative email for Aryan Neupane">email@aryanneupane.com</a>
+            </footer>
         </div>
-    </section>
+    </main>
 
-    <!-- DIMENSIONAL PROJECTS -->
-    <section class="holo-section">
-        <div class="container">
-            <h2 class="section-title">Projects</h2>
-            <div class="cards-grid">
-                <div class="dimension-card">
-                    <div class="card-content">
-                        <a href="https://stayease-9sga.onrender.com/" target="_blank" class="card-link">StayEase</a>
-                        <p class="card-description">Full-stack accommodation platform</p>
-                    </div>
-                </div>
-                <div class="dimension-card">
-                    <div class="card-content">
-                        <a href="https://react-weather-app-gamma-nine.vercel.app/" target="_blank"
-                            class="card-link">React Weather App</a>
-                        <p class="card-description">Real-time weather tracking system</p>
-                    </div>
-                </div>
-                <div class="dimension-card">
-                    <div class="card-content">
-                        <a href="https://lottery-ticket-game.vercel.app/" target="_blank" class="card-link">Lottery
-                            Ticket Game</a>
-                        <p class="card-description">Interactive probability simulator</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- NEURAL ARTICLES -->
-    <section class="holo-section">
-        <div class="container">
-            <h2 class="section-title">Articles</h2>
-            <div class="cards-grid">
-                <div class="dimension-card">
-                    <div class="card-content">
-                        <a href="https://open.substack.com/pub/aryanneupane/p/everyone-is-right-in-their-own-place?utm_campaign=post&utm_medium=web"
-                            target="_blank" class="card-link">Substack</a>
-                        <p class="card-description">"Everyone is right in their own place"</p>
-                    </div>
-                </div>
-                <div class="dimension-card">
-                    <div class="card-content">
-                        <a href="https://aryanneupane.blogspot.com/" target="_blank" class="card-link">Blogspot</a>
-                        <p class="card-description">"The Backwardness of Education in Nepal: A System Stuck in
-                            Memorization"</p>
-                    </div>
-                </div>
-                <div class="dimension-card">
-                    <div class="card-content">
-                        <a href="https://dev.to/aryanneupane/i-built-my-first-weather-app-using-react-openweathermap-api-a-beginners-experience-29ic"
-                            target="_blank" class="card-link">Dev.to</a>
-                        <p class="card-description">"I Built My First Weather App"</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- NEURAL CONTACT -->
-    <section class="contact-neural">
-        <div class="container">
-            <h2 class="section-title">Contact</h2>
-            <p class="neural-email">For faster response, email me at: contact@aryanneupane.com.np</p>
-            <div class="social-constellation">
-                <a href="https://github.com/aryanneupane" target="_blank" class="social-portal">GitHub</a>
-                <a href="https://www.linkedin.com/in/aryanneupane/" target="_blank" class="social-portal">LinkedIn</a>
-                <a href="https://x.com/aryanneupane" target="_blank" class="social-portal">X/Twitter</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- QUANTUM FOOTER -->
-    <footer class="quantum-footer">
-        <div class="container">
-            <p class="footer-text">© 2025 Aryan Neupane — Still building this thing...</p>
-        </div>
-    </footer>
+    <div id="secret-message" role="status" aria-live="polite"></div>
 
     <script>
-        // QUANTUM CURSOR SYSTEM
-        const cursorMain = document.querySelector('.cursor-main');
-        const cursorTrail = document.querySelector('.cursor-trail');
-        const cursorOrbit = document.querySelector('.cursor-orbit');
-
-        let mouseX = 0, mouseY = 0;
-        let trailX = 0, trailY = 0;
-        let orbitX = 0, orbitY = 0;
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
+        // Performance optimization
+        const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        
+        // Boot screen with progress bar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('boot-screen').classList.add('fade-out');
+                setTimeout(() => {
+                    document.querySelector('.hero').classList.add('visible');
+                }, 200);
+            }, 1200);
         });
 
-        function updateCursors() {
-            // Main cursor
-            cursorMain.style.left = mouseX + 'px';
-            cursorMain.style.top = mouseY + 'px';
+        // Enhanced particle system with depth
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-            // Trail cursor with delay
-            trailX += (mouseX - trailX) * 0.1;
-            trailY += (mouseY - trailY) * 0.1;
-            cursorTrail.style.left = trailX + 'px';
-            cursorTrail.style.top = trailY + 'px';
+        const particles = [];
+        const particleCount = 120;
+        let mouseX = canvas.width / 2;
+        let mouseY = canvas.height / 2;
 
-            // Orbit cursor with more delay
-            orbitX += (mouseX - orbitX) * 0.05;
-            orbitY += (mouseY - orbitY) * 0.05;
-            cursorOrbit.style.left = (orbitX - 20) + 'px';
-            cursorOrbit.style.top = (orbitY - 20) + 'px';
-
-            requestAnimationFrame(updateCursors);
-        }
-        updateCursors();
-
-        // NEURAL NETWORK GENERATION
-        function createNeuralNetwork() {
-            const container = document.getElementById('neuralNet');
-            const nodeCount = 50;
-
-            // Clear existing nodes
-            container.innerHTML = '';
-
-            const nodes = [];
-
-            // Create nodes
-            for (let i = 0; i < nodeCount; i++) {
-                const node = document.createElement('div');
-                node.className = 'neural-node';
-
-                const x = Math.random() * window.innerWidth;
-                const y = Math.random() * window.innerHeight;
-
-                node.style.left = x + 'px';
-                node.style.top = y + 'px';
-                node.style.animationDelay = Math.random() * 6 + 's';
-
-                container.appendChild(node);
-                nodes.push({ element: node, x, y });
+        class Particle {
+            constructor() {
+                this.reset();
             }
 
-            // Create connections
-            nodes.forEach((nodeA, i) => {
-                nodes.forEach((nodeB, j) => {
-                    if (i !== j) {
-                        const distance = Math.sqrt(
-                            Math.pow(nodeA.x - nodeB.x, 2) +
-                            Math.pow(nodeA.y - nodeB.y, 2)
-                        );
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.speedY = (Math.random() - 0.5) * 0.4;
+                this.opacity = Math.random() * 0.6 + 0.2;
+                this.depth = Math.random();
+                this.twinkleSpeed = Math.random() * 0.02 + 0.01;
+                this.twinklePhase = Math.random() * Math.PI * 2;
+                this.hue = 200 + Math.random() * 60;
+            }
 
-                        if (distance < 200) {
-                            const connection = document.createElement('div');
-                            connection.className = 'neural-connection';
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
 
-                            const angle = Math.atan2(nodeB.y - nodeA.y, nodeB.x - nodeA.x);
-                            const length = distance;
+                // Boundary wrapping
+                if (this.x < -10) this.x = canvas.width + 10;
+                if (this.x > canvas.width + 10) this.x = -10;
+                if (this.y < -10) this.y = canvas.height + 10;
+                if (this.y > canvas.height + 10) this.y = -10;
 
-                            connection.style.left = nodeA.x + 'px';
-                            connection.style.top = nodeA.y + 'px';
-                            connection.style.width = length + 'px';
-                            connection.style.transform = `rotate(${angle}rad)`;
-                            connection.style.animationDelay = Math.random() * 3 + 's';
+                // Twinkle effect
+                this.twinklePhase += this.twinkleSpeed;
+                this.currentOpacity = this.opacity * (0.5 + 0.5 * Math.sin(this.twinklePhase));
+            }
 
-                            container.appendChild(connection);
-                        }
+            draw() {
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2);
+                gradient.addColorStop(0, `hsla(${this.hue}, 70%, 70%, ${this.currentOpacity})`);
+                gradient.addColorStop(1, `hsla(${this.hue}, 70%, 70%, 0)`);
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        // Connection lines between close particles
+        function drawConnections() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 120) {
+                        const opacity = (1 - distance / 120) * 0.15;
+                        ctx.strokeStyle = `rgba(136, 176, 255, ${opacity})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
                     }
-                });
-            });
+                }
+            }
         }
 
-        // Initialize neural network
-        createNeuralNetwork();
-        window.addEventListener('resize', createNeuralNetwork);
-
-        // QUANTUM TERMINAL QUOTES
-        const quotes = [
-            "write, build, unbuild, and leave things half-finished so they can breathe.",
-            "Wear a mask, they'll clap. Show your face, they'll call it \"too much.\" Truth offends the fake — every single time.",
-            "Life's too short to get tangled in ego-driven drama. Rise above it. Live peacefully.@ | ॐ नमः शिवाय |",
-            "Construct, deconstruct, leave space to breathe.",
-            "The unfinished is where freedom lives."
-        ];
-
-        let currentQuote = 0;
-        const terminalBody = document.getElementById('terminalBody');
-
-        function quantumTypewriter(text, lineNum) {
-            return `
-                <div class="code-line" style="animation-delay: 0.${lineNum}s">
-                    <span class="line-number">${String(lineNum + 1).padStart(2, '0')}</span>
-                    <span class="prompt">></span>
-                    <span class="code-text">${text}</span>
-                    <span class="cursor-block"></span>
-                </div>
-            `;
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (!isReducedMotion) {
+                drawConnections();
+            }
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            requestAnimationFrame(animateParticles);
         }
 
-        function updateTerminal() {
-            const quote = quotes[currentQuote];
-            terminalBody.innerHTML = quantumTypewriter(quote, currentQuote + 1);
-            currentQuote = (currentQuote + 1) % quotes.length;
+        animateParticles();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Enhanced cursor glow with trail effect
+        const cursorGlow = document.getElementById('cursor-glow');
+        let targetX = 0, targetY = 0;
+        let currentX = 0, currentY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            targetX = e.clientX;
+            targetY = e.clientY;
+        });
+
+        function updateCursorGlow() {
+            // Smooth following with easing
+            currentX += (targetX - currentX) * 0.1;
+            currentY += (targetY - currentY) * 0.1;
+            
+            cursorGlow.style.left = (currentX - 150) + 'px';
+            cursorGlow.style.top = (currentY - 150) + 'px';
+            requestAnimationFrame(updateCursorGlow);
         }
 
-        setInterval(updateTerminal, 4000);
+        updateCursorGlow();
 
-        // DIMENSIONAL CARD INTERACTIONS
-        document.querySelectorAll('.dimension-card').forEach(card => {
-            card.addEventListener('mouseenter', function (e) {
-                const rect = this.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-
-                const rotateX = (y - centerY) / 10;
-                const rotateY = (centerX - x) / 10;
-
-                this.style.transform = `
-                    rotateX(${rotateX}deg) 
-                    rotateY(${rotateY}deg) 
-                    translateY(-20px) 
-                    scale(1.05)
-                `;
-            });
-
-            card.addEventListener('mouseleave', function () {
-                this.style.transform = 'rotateX(0deg) rotateY(0deg) translateY(0px) scale(1)';
-            });
-
-            card.addEventListener('mousemove', function (e) {
-                const rect = this.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-
-                const rotateX = (y - centerY) / 20;
-                const rotateY = (centerX - x) / 20;
-
-                this.style.transform = `
-                    rotateX(${rotateX}deg) 
-                    rotateY(${rotateY}deg) 
-                    translateY(-20px) 
-                    scale(1.05)
-                `;
+        // Enhanced parallax on mouse movement
+        document.addEventListener('mousemove', (e) => {
+            if (isReducedMotion) return;
+            
+            const moveX = (e.clientX - window.innerWidth / 2) * 0.015;
+            const moveY = (e.clientY - window.innerHeight / 2) * 0.015;
+            
+            particles.forEach(particle => {
+                const depth = particle.depth;
+                particle.x += moveX * depth;
+                particle.y += moveY * depth;
             });
         });
 
-        // GLITCH ACTIVATION
-        const nameElement = document.querySelector('.main-name');
-        const glitchLayers = document.querySelectorAll('.glitch-layer');
+        // Dynamic background gradient shift
+        let hue = 220;
+        let saturation = 20;
+        setInterval(() => {
+            if (isReducedMotion) return;
+            
+            hue = (hue + 0.05) % 360;
+            saturation = 20 + Math.sin(Date.now() / 10000) * 5;
+            document.body.style.background = `linear-gradient(135deg, 
+                hsl(${hue}, ${saturation}%, 4%) 0%, 
+                hsl(${(hue + 40) % 360}, ${saturation + 5}%, 6%) 100%)`;
+        }, 100);
 
-        nameElement.addEventListener('mouseenter', () => {
-            glitchLayers.forEach((layer, index) => {
-                layer.style.opacity = '1';
-                setTimeout(() => {
-                    layer.style.opacity = '0';
-                }, 500 + index * 100);
-            });
-        });
-
-        // QUANTUM SCROLL EFFECTS
+        // Scroll-based reveal with stagger
         const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+            threshold: 0.15,
+            rootMargin: '0px 0px -80px 0px'
         };
 
-        const quantumObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
                 if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0) scale(1)';
-
-                    // Add special effects for different elements
-                    if (entry.target.classList.contains('dimension-card')) {
-                        entry.target.style.animationDelay = Math.random() * 0.5 + 's';
-                    }
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, index * 100);
                 }
             });
         }, observerOptions);
 
-        // Initialize quantum scroll effects
-        document.querySelectorAll('.dimension-card, .holo-section').forEach((element, index) => {
-            element.style.opacity = '0';
-            element.style.transform = 'translateY(50px) scale(0.95)';
-            element.style.transition = 'all 1s cubic-bezier(0.25, 0.8, 0.25, 1)';
-            element.style.transitionDelay = index * 0.1 + 's';
-            quantumObserver.observe(element);
+        document.querySelectorAll('.construction-banner, .philosophical, .time-aware, .contact').forEach(el => {
+            observer.observe(el);
         });
 
-        // PARALLAX QUANTUM EFFECTS
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const rate = scrolled * -0.3;
-
-            // Neural network parallax
-            const neuralNet = document.getElementById('neuralNet');
-            if (neuralNet) {
-                neuralNet.style.transform = `translate3d(0, ${rate}px, 0)`;
-            }
-
-            // Scanlines effect
-            const scanlines = document.querySelector('.scanlines');
-            if (scanlines) {
-                scanlines.style.transform = `translate3d(0, ${scrolled * -0.1}px, 0)`;
-            }
-        });
-
-        // QUANTUM PORTAL EFFECTS
-        document.querySelectorAll('.social-portal').forEach(portal => {
-            portal.addEventListener('mouseenter', function () {
-                this.style.boxShadow = `
-                    0 20px 40px rgba(0, 255, 65, 0.4),
-                    0 0 50px rgba(0, 255, 65, 0.2),
-                    inset 0 0 20px rgba(0, 255, 65, 0.1)
-                `;
-            });
-
-            portal.addEventListener('mouseleave', function () {
-                this.style.boxShadow = 'none';
-            });
-        });
-
-        // PERFORMANCE OPTIMIZATION
-        let ticking = false;
-
-        function updateAnimations() {
-            // Batch DOM updates here if needed
-            ticking = false;
-        }
-
-        function requestTick() {
-            if (!ticking) {
-                requestAnimationFrame(updateAnimations);
-                ticking = true;
+        // Time-aware message
+        function setTimeMessage() {
+            const hour = new Date().getHours();
+            const messageEl = document.getElementById('time-message');
+            
+            if (hour >= 22 || hour < 6) {
+                messageEl.textContent = "The system is quieter now.";
+            } else {
+                messageEl.textContent = "Signals are louder during daylight.";
             }
         }
 
-        // QUANTUM EASTER EGGS
-        let konamiCode = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+        setTimeMessage();
+
+        // Secret interaction with animation
+        let secretTimeout;
+        document.addEventListener('keypress', (e) => {
+            if (e.key === '.' || e.key === '~') {
+                const msg = document.getElementById('secret-message');
+                msg.textContent = 'System state: evolving';
+                msg.classList.add('show');
+                
+                clearTimeout(secretTimeout);
+                secretTimeout = setTimeout(() => {
+                    msg.classList.remove('show');
+                }, 3500);
+            }
+        });
+
+        // Easter egg: konami code
+        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
         let konamiIndex = 0;
 
         document.addEventListener('keydown', (e) => {
-            if (e.keyCode === konamiCode[konamiIndex]) {
+            if (e.key === konamiCode[konamiIndex]) {
                 konamiIndex++;
                 if (konamiIndex === konamiCode.length) {
-                    // QUANTUM OVERLOAD MODE
-                    document.body.style.animation = 'quantum-overload 2s ease-in-out';
+                    const msg = document.getElementById('secret-message');
+                    msg.textContent = '⚡ Consciousness unlocked ⚡';
+                    msg.classList.add('show');
+                    
+                    // Add extra particle burst
+                    for (let i = 0; i < 50; i++) {
+                        particles.push(new Particle());
+                    }
+                    
                     setTimeout(() => {
-                        document.body.style.animation = '';
-                    }, 2000);
+                        msg.classList.remove('show');
+                        particles.splice(particleCount);
+                    }, 4000);
+                    
                     konamiIndex = 0;
                 }
             } else {
@@ -1504,21 +716,13 @@
             }
         });
 
-        // Add quantum overload animation
-        const quantumStyle = document.createElement('style');
-        quantumStyle.textContent = `
-            @keyframes quantum-overload {
-                0%, 100% { filter: hue-rotate(0deg) saturate(1); }
-                25% { filter: hue-rotate(90deg) saturate(2); }
-                50% { filter: hue-rotate(180deg) saturate(3); }
-                75% { filter: hue-rotate(270deg) saturate(2); }
-            }
-        `;
-        document.head.appendChild(quantumStyle);
-
-        console.log('🌌 QUANTUM PORTFOLIO INITIALIZED 🌌');
-        console.log('Try the Konami code for a surprise...');
+        // Accessibility: respect prefers-reduced-motion
+        if (isReducedMotion) {
+            document.querySelectorAll('*').forEach(el => {
+                el.style.animation = 'none';
+                el.style.transition = 'none';
+            });
+        }
     </script>
 </body>
-
 </html>
