@@ -1,56 +1,59 @@
-# Security Architecture & Threat Model
+# Security
 
-This document outlines the security architecture, authorization controls, data protection policies, and threat model for the **Aryan Neupane Cybersecurity & GRC Portfolio Platform**.
-
----
-
-## 1. Security Principles & Architecture
-
-The platform enforces defense-in-depth across the application lifecycle:
-
-* **Least Privilege Access Control**: Administrative functions (`/admin/*`) require explicit Firebase Authentication. Unauthenticated users cannot modify database records or upload assets.
-* **Server-Side Enforcement**: Authorization rules are enforced at the database level using Cloud Firestore & Firebase Storage Security Rules, not merely through client-side route guards.
-* **Zero Secrets in Source Code**: No private keys, service account credentials, or privileged access tokens are committed to repository control.
-* **Input Sanitization & XSS Prevention**: User inputs are sanitized prior to rendering, and security response headers are injected at the CDN/Hosting tier.
+Security architecture, authorization model and threat notes for the Aryan Neupane cybersecurity & GRC portfolio.
 
 ---
 
-## 2. Firestore Security Rules Matrix
+## 1. Principles
 
-| Collection | Unauthenticated Public | Authenticated Admin | Validation Rules |
+* **Server-side enforcement** — authorization is enforced by Cloud Firestore and Firebase Storage security rules. Client-side route guards are convenience only.
+* **Least privilege** — writes to `projects`, `blogPosts` and `contactMessages` require an authenticated admin. Anonymous users may only read published content and create a validated contact message.
+* **No secrets in source** — no service-account keys, private tokens or passwords are committed. Firebase client config and the EmailJS public key are supplied through `VITE_*` environment variables and are, by design, public browser identifiers.
+* **Deny by default** — the Firestore ruleset ends with a catch-all `allow read, write: if false`.
+
+## 2. Admin authorization model
+
+Admin status is derived from a single source: a Firestore document at `users/{uid}` with `role == "admin"`.
+
+* `firestore.rules` and `storage.rules` both evaluate this document; there is no hardcoded UID.
+* `users/{uid}` is writable only by an existing admin, so the **first admin document must be created manually in the Firebase console**. Creating an Authentication user alone grants no privileges.
+* Signing in via `/admin/login` only authenticates; every privileged read/write is still evaluated against the rules.
+
+## 3. Firestore rules matrix
+
+| Collection | Anonymous | Admin | Validation |
 | :--- | :--- | :--- | :--- |
-| `projects` | `read` (where `published == true`) | `create`, `update`, `delete`, `read` | Must be published or Admin UID |
-| `blogPosts` | `read` (where `published == true`) | `create`, `update`, `delete`, `read` | Must be published or Admin UID |
-| `contactMessages` | `create` (with valid schema) | `read`, `update`, `delete` | Non-empty name, email, message |
-| `users` | `deny` | `read`, `write` | Restricted to Admin UID |
-| `auditLogs` | `deny` | `read`, `write` | Restricted to Admin UID |
+| `projects` | `get`, `list` where `published == true` | full | — |
+| `blogPosts` | `get`, `list` where `published == true` | full | — |
+| `contactMessages` | `create` only | `read`, `update`, `delete` | name ≤ 120, email ≤ 254, message ≤ 5000, all non-empty |
+| `users` | deny | read own, write as admin | — |
+| `auditLogs` | deny | full | — |
+| everything else | deny | deny | — |
 
----
+## 4. Storage rules
 
-## 3. Storage Security Rules
+* `public/**` — world readable; writable only by an admin.
+* Everything else — admin read/write only.
+* Uploads must be `image/*` or `application/pdf` and under 10 MB. The admin UI enforces the same limits client-side for feedback only.
 
-* **Public Read**: Allowed for assets within `/public/` directory (cover images, artifact documents).
-* **Admin Uploads**: Restricted to Admin UID with file type limits (MIME validation for `image/*` and `application/pdf`) and maximum file size cap of **10 MB** per file.
+## 5. Contact form
 
----
+* Delivery uses EmailJS directly from the browser (`VITE_EMAILJS_*`). The public key is a browser identifier; abuse protection relies on EmailJS quotas plus the checks below.
+* Spam controls: hidden honeypot field (`website_url_hp`) and a minimum time-to-submit check. Both silently discard the submission.
+* Client-side validation covers required fields, email shape and message length. Firestore rules re-validate the archived copy server-side.
+* If EmailJS is not configured, the form states so and offers a direct mailto link rather than reporting a false success.
 
-## 4. Threat Model & Mitigations
+## 6. XSS and content injection
 
-### A. Unauthenticated Administrative Access
-* **Threat**: Attacker attempts to forge client state or bypass client route guards to manipulate portfolio content.
-* **Mitigation**: Security rules evaluate `request.auth != null` and match the user ID against authorized Admin roles at the database boundary. Direct REST/SDK calls without valid tokens are rejected with permission-denied status.
+* All dynamic content is rendered through React's escaping; the app uses no `dangerouslySetInnerHTML`. Blog content is parsed by a small renderer that emits only headings, lists and paragraphs as React elements — raw HTML in post bodies is displayed as text, not executed.
+* Response headers set in `firebase.json`: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`.
 
-### B. Contact Form Spam & Automated Bot Abuse
-* **Threat**: Automated bots flood the contact form with spam or malicious payload links.
-* **Mitigation**: Integrated invisible honeypot parameter (`website_url_hp`). Bots filling out the honeypot field are silently dropped. Firestore schema validation enforces payload boundary limits.
+## 7. Known limitations
 
-### C. Cross-Site Scripting (XSS) & Content Injection
-* **Threat**: Malicious HTML injection in contact messages or Markdown content.
-* **Mitigation**: React's safe DOM escaping handles dynamic output. Security headers (`X-Content-Type-Options: nosniff`, `X-XSS-Protection: 1; mode=block`, `X-Frame-Options: DENY`) are enforced via `firebase.json`.
+1. **Public client config** — Firebase web API keys and the EmailJS public key are visible in the built bundle. This is expected; all protection comes from the security rules and EmailJS-side settings.
+2. **No rate limiting** — the Spark plan offers no request throttling beyond daily quotas. Contact abuse is mitigated only by the honeypot, timing check and EmailJS quotas.
+3. **Local content mode** — when `VITE_FIREBASE_*` is unset the app reads seed data and stores admin edits in `localStorage`. This mode is for local development only and carries no authorization.
 
----
+## 8. Reporting
 
-## 5. Security Assumptions & Known Limitations
-
-1. **Firebase Public Config**: Firebase API keys included in `src/services/firebase.js` are public identifiers for client app initialization (standard Firebase architecture). Security relies entirely on Firestore & Storage Security Rules.
-2. **Spark Plan Quotas**: Rate limiting relies on Firestore security rules and native quota limits (50k reads/day) on the Firebase free tier.
+Report suspected vulnerabilities to `official.aryanneupane@gmail.com`.

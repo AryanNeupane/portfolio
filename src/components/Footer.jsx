@@ -13,7 +13,7 @@ export default function Footer({ onNavigate }) {
               <span>Aryan Neupane</span>
             </div>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-              Cybersecurity & Governance, Risk & Compliance (GRC) Portfolio. Practical security governance, risk assessment, and ISO 27001 / NIST CSF 2.0 implementation evidence.
+              Early-career cybersecurity and GRC portfolio: risk assessment, control documentation and framework practice against ISO/IEC 27001:2022 and NIST CSF 2.0. Capstone work is simulated and labelled as such.
             </p>
           </div>
 
@@ -53,7 +53,7 @@ export default function Footer({ onNavigate }) {
           </div>
 
           <div>
-            <h4 style={{ color: 'var(--text-primary)', fontSize: '0.9rem', marginBottom: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)' }}>Verified Channels</h4>
+            <h4 style={{ color: 'var(--text-primary)', fontSize: '0.9rem', marginBottom: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)' }}>Contact</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem' }}>
               <li>
                 <a href={`mailto:${PERSONAL_PROFILE.emails[0]}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}>
@@ -64,14 +64,14 @@ export default function Footer({ onNavigate }) {
               <li>
                 <a href={PERSONAL_PROFILE.socialLinks.github} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}>
                   <Github size={13} />
-                  <span>GitHub Repository</span>
+                  <span>GitHub</span>
                   <ExternalLink size={10} />
                 </a>
               </li>
               <li>
                 <a href={PERSONAL_PROFILE.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-secondary)' }}>
                   <Linkedin size={13} />
-                  <span>LinkedIn Profile</span>
+                  <span>LinkedIn</span>
                   <ExternalLink size={10} />
                 </a>
               </li>
@@ -84,7 +84,7 @@ export default function Footer({ onNavigate }) {
             &copy; {new Date().getFullYear()} Aryan Neupane. All rights reserved.
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            Cybersecurity & GRC Portfolio Platform • ISO 27001 & NIST CSF 2.0 Aligned
+            ISO/IEC 27001:2022 &amp; NIST CSF 2.0 practice
           </div>
         </div>
       </div>

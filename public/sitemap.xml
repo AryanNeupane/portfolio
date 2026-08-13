@@ -25,10 +25,46 @@
     <priority>0.95</priority>
   </url>
   <url>
+    <loc>https://aryanneupane.com.np/portfolio/splunk-soc-home-lab</loc>
+    <lastmod>2026-08-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aryanneupane.com.np/portfolio/web-application-security-testing</loc>
+    <lastmod>2026-08-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://aryanneupane.com.np/portfolio/grc-learning-implementations</loc>
+    <lastmod>2026-08-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://aryanneupane.com.np/blog</loc>
     <lastmod>2026-08-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://aryanneupane.com.np/blog/structuring-enterprise-risk-register-iso-27001</loc>
+    <lastmod>2026-08-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aryanneupane.com.np/blog/nist-csf-2-vs-iso-27001-2022</loc>
+    <lastmod>2026-08-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://aryanneupane.com.np/blog/from-failed-logons-to-a-monitoring-control</loc>
+    <lastmod>2026-08-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://aryanneupane.com.np/contact</loc>

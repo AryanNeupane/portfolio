@@ -1,15 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import {
-  Shield,
-  FileText,
-  AlertTriangle,
-  CheckCircle,
-  ShieldAlert,
-  Eye,
-  Download,
-  ExternalLink,
-  RefreshCw,
-} from 'lucide-react';
+import { Shield, FileText, Eye, ExternalLink } from 'lucide-react';
 
 const CATEGORY_LABELS = {
   GOVERNANCE: 'Governance',
@@ -19,339 +9,374 @@ const CATEGORY_LABELS = {
   CONTINUAL_IMPROVEMENT: 'Continual Improvement',
 };
 
-export default function GrcArtifactViewer({ artifactData, githubUrl }) {
-  const [activeCategory, setActiveCategory] = useState('GOVERNANCE');
-  const [selectedArtifactId, setSelectedArtifactId] = useState(null);
+const CATEGORY_ORDER = ['GOVERNANCE', 'RISK', 'CONTROLS', 'ASSESSMENT', 'CONTINUAL_IMPROVEMENT'];
 
-  const catalog = artifactData?.artifactCatalog || [];
+function severityBadgeClass(value = '') {
+  const v = value.toLowerCase();
+  if (v.includes('critical') || v.includes('high')) return 'badge badge-rose';
+  if (v.includes('medium') || v.includes('partial') || v.includes('progress')) return 'badge badge-amber';
+  if (v.includes('low') || v.includes('effective') || v.includes('established') || v.includes('implemented')) {
+    return 'badge badge-emerald';
+  }
+  return 'badge';
+}
+
+function DataTable({ columns, rows, renderCell }) {
+  return (
+    <div className="grc-table-container">
+      <table className="grc-table">
+        <thead>
+          <tr>
+            {columns.map((c) => (
+              <th key={c.key} scope="col">
+                {c.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={row.id || row.riskId || row.controlId || i}>
+              {columns.map((c) => (
+                <td key={c.key}>{renderCell ? renderCell(c.key, row[c.key], row) : row[c.key]}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default function GrcArtifactViewer({ artifactData, githubUrl }) {
+  const catalog = useMemo(() => artifactData?.artifactCatalog || [], [artifactData]);
 
   const categories = useMemo(() => {
-    const keys = [...new Set(catalog.map((a) => a.category))];
-    return keys.map((key) => ({ key, label: CATEGORY_LABELS[key] || key }));
+    const present = [...new Set(catalog.map((a) => a.category))];
+    return CATEGORY_ORDER.filter((k) => present.includes(k)).map((key) => ({
+      key,
+      label: CATEGORY_LABELS[key] || key,
+      count: catalog.filter((a) => a.category === key).length,
+    }));
   }, [catalog]);
 
+  const [activeCategory, setActiveCategory] = useState(categories[0]?.key || 'GOVERNANCE');
+  const [selectedArtifactId, setSelectedArtifactId] = useState(null);
+
+  if (!artifactData || catalog.length === 0) return null;
+
   const filteredArtifacts = catalog.filter((a) => a.category === activeCategory);
-  const selected = catalog.find((a) => a.id === selectedArtifactId) || filteredArtifacts[0];
-
-  if (!artifactData) return null;
-
-  const getRiskBadge = (rating) => {
-    switch (rating?.toLowerCase()) {
-      case 'high':
-      case 'critical':
-        return (
-          <span className="badge badge-amber">
-            <ShieldAlert size={12} /> {rating}
-          </span>
-        );
-      case 'medium':
-        return (
-          <span className="badge badge-blue">
-            <AlertTriangle size={12} /> {rating}
-          </span>
-        );
-      default:
-        return (
-          <span className="badge badge-emerald">
-            <CheckCircle size={12} /> {rating}
-          </span>
-        );
-    }
-  };
+  const selected = filteredArtifacts.find((a) => a.id === selectedArtifactId) || filteredArtifacts[0];
+  const repoUrl = githubUrl || artifactData.sourceRepo;
 
   const renderArtifactContent = () => {
     if (!selected) return null;
 
-    if (selected.id === 'ismsScope' && artifactData.ismsScope) {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <p style={{ fontSize: '0.9rem' }}>
-            <strong>Scope Boundary:</strong> {artifactData.ismsScope.boundary}
-          </p>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            <strong>Exclusions:</strong> {artifactData.ismsScope.exclusions}
-          </p>
-          <div>
-            <h5 style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>Strategic Objectives</h5>
-            <ul style={{ listStyle: 'square', paddingLeft: '1.25rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-              {artifactData.ismsScope.keyObjectives.map((obj, i) => (
-                <li key={i}>{obj}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      );
-    }
+    switch (selected.id) {
+      case 'ismsScope': {
+        const scope = artifactData.ismsScope;
+        if (!scope) break;
+        return (
+          <div className="artifact-body">
+            <p className="artifact-lead">{scope.boundary}</p>
 
-    if (selected.id === 'riskRegister' && artifactData.riskRegister) {
-      return (
-        <div className="grc-table-container">
-          <table className="grc-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Asset</th>
-                <th>Threat</th>
-                <th>Score</th>
-                <th>Rating</th>
-                <th>Owner</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {artifactData.riskRegister.map((item) => (
-                <tr key={item.riskId}>
-                  <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-primary)' }}>{item.riskId}</td>
-                  <td>{item.asset}</td>
-                  <td style={{ fontSize: '0.825rem' }}>{item.threat}</td>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{item.riskScore}</td>
-                  <td>{getRiskBadge(item.riskRating)}</td>
-                  <td style={{ fontSize: '0.825rem' }}>{item.riskOwner}</td>
-                  <td>
-                    <span className="badge">{item.status}</span>
-                  </td>
-                </tr>
+            <dl className="definition-grid">
+              {scope.boundaries?.map((b) => (
+                <div key={b.label}>
+                  <dt>{b.label}</dt>
+                  <dd>{b.value}</dd>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
+            </dl>
 
-    if (selected.id === 'soa' && artifactData.statementOfApplicability) {
-      return (
-        <div className="grc-table-container">
-          <table className="grc-table">
-            <thead>
-              <tr>
-                <th>Ref</th>
-                <th>Control</th>
-                <th>Status</th>
-                <th>Justification</th>
-              </tr>
-            </thead>
-            <tbody>
-              {artifactData.statementOfApplicability.map((item) => (
-                <tr key={item.controlId}>
-                  <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-primary)' }}>{item.controlId}</td>
-                  <td>{item.controlName}</td>
-                  <td>
-                    {item.status === 'Included' ? (
-                      <span className="badge badge-emerald">Included</span>
-                    ) : (
-                      <span className="badge">Excluded</span>
-                    )}
-                  </td>
-                  <td style={{ fontSize: '0.85rem' }}>{item.justification}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-
-    if (selected.id === 'controlOwnership' && artifactData.controlOwnership) {
-      return (
-        <div className="grc-table-container">
-          <table className="grc-table">
-            <thead>
-              <tr>
-                <th>Domain</th>
-                <th>Owner Role</th>
-                <th>Review Cadence</th>
-              </tr>
-            </thead>
-            <tbody>
-              {artifactData.controlOwnership.map((item, i) => (
-                <tr key={i}>
-                  <td style={{ fontWeight: 600 }}>{item.controlDomain}</td>
-                  <td style={{ color: 'var(--accent-primary)' }}>{item.ownerRole}</td>
-                  <td style={{ fontFamily: 'var(--font-mono)' }}>{item.reviewFrequency}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-
-    if ((selected.id === 'nistDashboard' || selected.id === 'nistAssessment') && artifactData.nistCsfDashboard) {
-      return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-          {artifactData.nistCsfDashboard.map((fn, i) => (
-            <div
-              key={i}
-              style={{
-                background: 'var(--bg-tertiary)',
-                border: '1px solid var(--border-color)',
-                padding: '1.15rem',
-                borderRadius: 'var(--radius-md)',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.85rem', color: 'var(--accent-primary)' }}>
-                  {fn.function}
-                </span>
-                <span className="badge">{fn.maturity} / 4.0</span>
+            <div className="artifact-split">
+              <div>
+                <h5>In scope</h5>
+                <ul className="tick-list">
+                  {scope.inScope?.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
               </div>
-              <p style={{ fontSize: '0.825rem', marginBottom: '0.5rem' }}>{fn.category}</p>
-              <div style={{ height: '4px', background: 'var(--border-color)', borderRadius: '2px' }}>
-                <div
-                  style={{
-                    height: '100%',
-                    width: `${(fn.maturity / 4) * 100}%`,
-                    background: 'var(--accent-primary)',
-                    borderRadius: '2px',
-                  }}
-                />
+              <div>
+                <h5>Excluded</h5>
+                <ul className="tick-list tick-list-muted">
+                  {scope.exclusions?.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
               </div>
             </div>
-          ))}
-        </div>
-      );
+          </div>
+        );
+      }
+
+      case 'riskRegister': {
+        const rows = artifactData.riskRegister;
+        if (!rows) break;
+        return (
+          <DataTable
+            rows={rows}
+            columns={[
+              { key: 'riskId', label: 'ID' },
+              { key: 'asset', label: 'Asset' },
+              { key: 'threat', label: 'Threat' },
+              { key: 'inherent', label: 'Inherent' },
+              { key: 'effectiveness', label: 'Control effectiveness' },
+              { key: 'residual', label: 'Residual' },
+              { key: 'owner', label: 'Owner' },
+            ]}
+            renderCell={(key, value) => {
+              if (key === 'riskId') return <span className="mono accent">{value}</span>;
+              if (key === 'inherent' || key === 'residual') {
+                return <span className={severityBadgeClass(value)}>{value}</span>;
+              }
+              return value;
+            }}
+          />
+        );
+      }
+
+      case 'riskTreatment': {
+        const rows = artifactData.riskTreatment;
+        if (!rows) break;
+        return (
+          <DataTable
+            rows={rows}
+            columns={[
+              { key: 'priority', label: 'Priority' },
+              { key: 'item', label: 'Gap / risk' },
+              { key: 'treatment', label: 'Treatment decision' },
+              { key: 'owner', label: 'Owner' },
+              { key: 'target', label: 'Target' },
+            ]}
+            renderCell={(key, value) =>
+              key === 'priority' ? <span className={severityBadgeClass(value)}>{value}</span> : value
+            }
+          />
+        );
+      }
+
+      case 'soa': {
+        const rows = artifactData.statementOfApplicability;
+        if (!rows) break;
+        return (
+          <DataTable
+            rows={rows}
+            columns={[
+              { key: 'controlId', label: 'Ref' },
+              { key: 'controlName', label: 'Control' },
+              { key: 'selected', label: 'Selected' },
+              { key: 'risks', label: 'Treats risk' },
+              { key: 'justification', label: 'Justification' },
+              { key: 'status', label: 'Status' },
+            ]}
+            renderCell={(key, value) => {
+              if (key === 'controlId') return <span className="mono accent">{value}</span>;
+              if (key === 'selected') {
+                return value ? (
+                  <span className="badge badge-emerald">Selected</span>
+                ) : (
+                  <span className="badge">Excluded</span>
+                );
+              }
+              if (key === 'risks') return <span className="mono">{value}</span>;
+              if (key === 'status') return <span className={severityBadgeClass(value)}>{value}</span>;
+              return value;
+            }}
+          />
+        );
+      }
+
+      case 'controlOwnership': {
+        const rows = artifactData.controlOwnership;
+        if (!rows) break;
+        return (
+          <DataTable
+            rows={rows}
+            columns={[
+              { key: 'control', label: 'Control' },
+              { key: 'owner', label: 'Owner (accountable)' },
+              { key: 'operator', label: 'Operator' },
+              { key: 'reviewer', label: 'Reviewer' },
+              { key: 'evidenceOwner', label: 'Evidence owner' },
+            ]}
+          />
+        );
+      }
+
+      case 'controlEffectiveness': {
+        const rows = artifactData.controlEffectiveness;
+        if (!rows) break;
+        return (
+          <DataTable
+            rows={rows}
+            columns={[
+              { key: 'control', label: 'Control' },
+              { key: 'design', label: 'Design effectiveness' },
+              { key: 'operating', label: 'Operating effectiveness' },
+              { key: 'classification', label: 'Classification' },
+            ]}
+            renderCell={(key, value) =>
+              key === 'classification' ? <span className={severityBadgeClass(value)}>{value}</span> : value
+            }
+          />
+        );
+      }
+
+      case 'nistAssessment':
+      case 'nistDashboard': {
+        const rows = artifactData.nistCsfProfile;
+        if (!rows) break;
+        return (
+          <div className="artifact-body">
+            {artifactData.csfTier && (
+              <div className="tier-strip">
+                <div>
+                  <span className="label">Current tier</span>
+                  <strong>{artifactData.csfTier.current}</strong>
+                </div>
+                <div>
+                  <span className="label">Target</span>
+                  <strong>{artifactData.csfTier.target}</strong>
+                </div>
+              </div>
+            )}
+            <div className="csf-grid">
+              {rows.map((fn) => (
+                <div key={fn.function} className="csf-card">
+                  <div className="csf-card-head">
+                    <span className="mono accent">{fn.function}</span>
+                    <span className={severityBadgeClass(fn.status)}>{fn.status}</span>
+                  </div>
+                  <p className="csf-current">{fn.current}</p>
+                  <p className="csf-gap">
+                    <strong>Gap:</strong> {fn.gap}
+                  </p>
+                  <p className="csf-target">
+                    <strong>Target:</strong> {fn.target}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      case 'continualImprovement': {
+        const rows = artifactData.continualImprovement;
+        if (!rows) break;
+        return (
+          <DataTable
+            rows={rows}
+            columns={[
+              { key: 'id', label: 'ID' },
+              { key: 'idea', label: 'Opportunity' },
+              { key: 'source', label: 'Source' },
+              { key: 'owner', label: 'Owner' },
+              { key: 'priority', label: 'Priority' },
+              { key: 'status', label: 'Status' },
+            ]}
+            renderCell={(key, value) => {
+              if (key === 'id') return <span className="mono accent">{value}</span>;
+              if (key === 'priority') return <span className={severityBadgeClass(value)}>{value}</span>;
+              return value;
+            }}
+          />
+        );
+      }
+
+      default:
+        break;
     }
 
-    if (selected.id === 'continualImprovement') {
-      return (
-        <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.875rem' }}>
-          <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-            <CheckCircle size={14} style={{ color: 'var(--accent-emerald)', marginTop: '0.15rem' }} />
-            <span>
-              <strong>CAPA-2026-01:</strong> Enforce mandatory SSO/MFA on contractor accounts — Verified
-            </span>
-          </li>
-          <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-            <RefreshCw size={14} style={{ color: 'var(--accent-primary)', marginTop: '0.15rem' }} />
-            <span>
-              <strong>CAPA-2026-02:</strong> Automate Splunk SPL alert triggers for brute force thresholds — In Testing
-            </span>
-          </li>
-        </ul>
-      );
-    }
-
-    return (
-      <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-        Full artifact content is maintained in the project repository. Use the GitHub link below to access complete documentation.
-      </p>
-    );
+    return null;
   };
 
+  const content = renderArtifactContent();
+
   return (
-    <div className="card" style={{ padding: '2rem', marginTop: '2.5rem', borderRadius: 'var(--radius-xl)' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          marginBottom: '1.5rem',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
+    <section className="artifact-explorer" aria-label="GRC artifact explorer">
+      <div className="artifact-explorer-head">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
-            <Shield size={20} style={{ color: 'var(--accent-primary)' }} />
-            <h3 style={{ fontSize: '1.3rem' }}>GRC Artifact Explorer</h3>
+          <div className="artifact-explorer-title">
+            <Shield size={18} aria-hidden="true" />
+            <h3>GRC Artifact Explorer</h3>
           </div>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-            Simulated enterprise capstone documentation organized by governance lifecycle.
+          <p>
+            Capstone documentation organised by governance lifecycle. Extracts are shown inline; complete documents
+            live in the project repository.
           </p>
         </div>
-        <span className="badge badge-amber">Simulated Capstone</span>
+        <span className="badge badge-amber">Simulated capstone</span>
       </div>
 
-      <div className="tab-list">
+      <div className="tab-list" role="tablist" aria-label="Artifact categories">
         {categories.map((cat) => (
           <button
             key={cat.key}
+            role="tab"
+            type="button"
+            id={`artifact-tab-${cat.key}`}
+            aria-selected={activeCategory === cat.key}
+            aria-controls="artifact-panel"
             className={`tab-btn ${activeCategory === cat.key ? 'active' : ''}`}
             onClick={() => {
               setActiveCategory(cat.key);
               setSelectedArtifactId(null);
             }}
           >
-            {cat.label}
+            {cat.label} <span className="tab-count">{cat.count}</span>
           </button>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div className="artifact-layout" id="artifact-panel" role="tabpanel" aria-labelledby={`artifact-tab-${activeCategory}`}>
+        <ul className="artifact-list">
           {filteredArtifacts.map((artifact) => (
-            <button
-              key={artifact.id}
-              onClick={() => setSelectedArtifactId(artifact.id)}
-              style={{
-                textAlign: 'left',
-                background: selected?.id === artifact.id ? 'var(--bg-tertiary)' : 'transparent',
-                border: `1px solid ${selected?.id === artifact.id ? 'var(--border-hover)' : 'var(--border-color)'}`,
-                borderRadius: 'var(--radius-md)',
-                padding: '1rem',
-                cursor: 'pointer',
-                color: 'inherit',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: '0.925rem', marginBottom: '0.25rem' }}>{artifact.title}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                    {artifact.framework}
-                  </div>
-                </div>
-                {artifact.viewable ? (
-                  <Eye size={14} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-                ) : (
-                  <FileText size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                )}
-              </div>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem', marginBottom: 0 }}>
-                {artifact.description}
-              </p>
-            </button>
+            <li key={artifact.id}>
+              <button
+                type="button"
+                className={`artifact-item ${selected?.id === artifact.id ? 'active' : ''}`}
+                onClick={() => setSelectedArtifactId(artifact.id)}
+                aria-pressed={selected?.id === artifact.id}
+              >
+                <span className="artifact-item-head">
+                  <span className="artifact-item-title">{artifact.title}</span>
+                  {artifact.viewable ? (
+                    <Eye size={14} aria-hidden="true" />
+                  ) : (
+                    <FileText size={14} aria-hidden="true" className="muted-icon" />
+                  )}
+                </span>
+                <span className="artifact-item-framework mono">{artifact.framework}</span>
+              </button>
+            </li>
           ))}
-        </div>
+        </ul>
 
         {selected && (
-          <div
-            style={{
-              background: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '1.5rem',
-            }}
-          >
-            <div style={{ marginBottom: '1rem' }}>
-              <h4 style={{ fontSize: '1.05rem', marginBottom: '0.35rem' }}>{selected.title}</h4>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.75rem' }}>
-                <span className="badge">{selected.type}</span>
-                <span className="badge badge-blue">{selected.framework}</span>
-              </div>
-              <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-                <strong>Purpose:</strong> {selected.purpose}
-              </p>
+          <div className="artifact-detail">
+            <h4>{selected.title}</h4>
+            <div className="artifact-detail-tags">
+              <span className="badge">{selected.type}</span>
+              <span className="badge badge-blue">{selected.framework}</span>
             </div>
+            <p className="artifact-purpose">{selected.purpose}</p>
 
-            {selected.viewable ? (
-              renderArtifactContent()
-            ) : (
-              <div
-                style={{
-                  padding: '1.25rem',
-                  border: '1px dashed var(--border-color)',
-                  borderRadius: 'var(--radius-md)',
-                  textAlign: 'center',
-                }}
-              >
-                <FileText size={24} style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }} />
-                <p style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>
-                  Full artifact available in the project repository.
-                </p>
-                {githubUrl && (
-                  <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
-                    <ExternalLink size={14} />
-                    <span>View on GitHub</span>
+            {content || (
+              <div className="artifact-placeholder">
+                <FileText size={22} aria-hidden="true" />
+                <p>{selected.description}</p>
+                {repoUrl && (
+                  <a
+                    href={`${repoUrl}/tree/main/${(selected.repoPath || '').split('/')[0]}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-outline btn-sm"
+                  >
+                    <ExternalLink size={14} aria-hidden="true" />
+                    <span>Open in repository</span>
                   </a>
                 )}
               </div>
@@ -360,15 +385,14 @@ export default function GrcArtifactViewer({ artifactData, githubUrl }) {
         )}
       </div>
 
-      {githubUrl && (
-        <div style={{ marginTop: '1.5rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-color)' }}>
-          <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
-            <Download size={14} />
-            <span>Access Full Artifact Repository</span>
-            <ExternalLink size={12} />
+      {repoUrl && (
+        <div className="artifact-explorer-foot">
+          <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
+            <ExternalLink size={14} aria-hidden="true" />
+            <span>Full artifact repository</span>
           </a>
         </div>
       )}
-    </div>
+    </section>
   );
 }

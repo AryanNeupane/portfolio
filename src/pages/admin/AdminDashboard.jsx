@@ -1,10 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, Plus, Edit, Trash2, Eye, FileText, Mail, LogOut, CheckCircle, AlertTriangle, Layers, Save, RefreshCw, Image, Upload, HardDrive } from 'lucide-react';
-import { getProjects, getBlogPosts, getContactMessages, saveProject, saveBlogPost } from '../../services/dataService';
-import { storage } from '../../services/firebase';
+import React, { useEffect, useState } from 'react';
+import {
+  Edit,
+  FileText,
+  HardDrive,
+  Image,
+  Layers,
+  LogOut,
+  Mail,
+  Plus,
+  RefreshCw,
+  Save,
+  Trash2,
+  Upload,
+} from 'lucide-react';
+import {
+  getProjects,
+  getBlogPosts,
+  getContactMessages,
+  saveProject,
+  saveBlogPost,
+  deleteProject,
+  deleteBlogPost,
+  setProjectFlag,
+  setBlogPostFlag,
+  setMessageRead,
+  deleteContactMessage,
+} from '../../services/dataService';
+import { storage, isFirebaseConfigured } from '../../services/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useToast } from '../../components/Toast';
 
-export default function AdminDashboard({ onLogout, onNavigate }) {
+const EMPTY_PROJECT = {
+  title: '',
+  slug: '',
+  summary: '',
+  category: 'GRC',
+  published: false,
+  featured: false,
+  githubUrl: '',
+  documentationUrl: '',
+  coverImage: '',
+  frameworks: [],
+  deliverables: [],
+};
+
+const EMPTY_POST = {
+  title: '',
+  slug: '',
+  excerpt: '',
+  content: '',
+  category: 'GRC',
+  tags: [],
+  coverImage: '',
+  seoTitle: '',
+  seoDescription: '',
+  readingTime: '5 min read',
+  published: false,
+  featured: false,
+};
+
+const toList = (value) =>
+  value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const formatDate = (value) => {
+  if (!value) return '—';
+  if (typeof value === 'string') return value.slice(0, 10);
+  if (value.seconds) return new Date(value.seconds * 1000).toISOString().slice(0, 10);
+  return '—';
+};
+
+export default function AdminDashboard({ onLogout }) {
+  const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [projects, setProjects] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -13,20 +82,22 @@ export default function AdminDashboard({ onLogout, onNavigate }) {
   const [editingProject, setEditingProject] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
   const [uploadStatus, setUploadStatus] = useState('');
+  const [uploadedUrl, setUploadedUrl] = useState('');
 
   const refreshData = async () => {
     setLoading(true);
     try {
-      const [projData, blogData, msgData] = await Promise.all([
+      const [projectData, postData, messageData] = await Promise.all([
         getProjects(true),
         getBlogPosts(true),
-        getContactMessages()
+        getContactMessages(),
       ]);
-      setProjects(projData);
-      setPosts(blogData);
-      setMessages(msgData);
+      setProjects(projectData);
+      setPosts(postData);
+      setMessages(messageData);
     } catch (err) {
-      console.error("Dashboard refresh error:", err);
+      console.error('Dashboard refresh error:', err);
+      addToast('Could not load content.', 'error');
     } finally {
       setLoading(false);
     }
@@ -34,421 +105,662 @@ export default function AdminDashboard({ onLogout, onNavigate }) {
 
   useEffect(() => {
     refreshData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSaveProjectForm = async (e) => {
-    e.preventDefault();
-    await saveProject(editingProject);
-    setEditingProject(null);
-    refreshData();
-  };
-
-  const handleSavePostForm = async (e) => {
-    e.preventDefault();
-    await saveBlogPost(editingPost);
-    setEditingPost(null);
-    refreshData();
-  };
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadStatus('File size exceeds 10MB limit.');
-      return;
-    }
-
-    setUploadStatus('Uploading file...');
+  const run = async (action, successMessage) => {
     try {
-      if (storage) {
-        const fileRef = ref(storage, `public/${Date.now()}_${file.name}`);
-        await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(fileRef);
-        setUploadStatus(`File uploaded successfully! URL: ${url}`);
-      } else {
-        setUploadStatus('Firebase Storage offline / simulation mode.');
-      }
+      await action();
+      await refreshData();
+      if (successMessage) addToast(successMessage, 'success');
     } catch (err) {
-      setUploadStatus(`Upload error: ${err.message}`);
+      console.error(err);
+      addToast(err.message || 'Action failed.', 'error');
     }
   };
 
-  const publishedProjectsCount = projects.filter(p => p.published).length;
-  const draftProjectsCount = projects.filter(p => !p.published).length;
-  const publishedPostsCount = posts.filter(b => b.published).length;
-  const draftPostsCount = posts.filter(b => !b.published).length;
+  const confirmThen = (message, action) => {
+    if (window.confirm(message)) run(action, 'Deleted.');
+  };
+
+  const unreadCount = messages.filter((m) => !m.read).length;
 
   return (
     <div className="admin-dashboard-page section">
       <div className="container">
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border-color)', pb: '1.5rem' }}>
+        <header className="section-head">
           <div>
-            <div className="badge badge-emerald" style={{ marginBottom: '0.4rem' }}>Authenticated Control Panel</div>
-            <h1>Portfolio CMS Administration</h1>
+            <p className="eyebrow">Admin</p>
+            <h1>Content management</h1>
+            {!isFirebaseConfigured && (
+              <p className="form-notice" style={{ marginTop: '1rem' }}>
+                Firebase is not configured in this environment — changes are stored in this browser only.
+              </p>
+            )}
           </div>
+          <div className="admin-toolbar">
+            <button type="button" className="btn btn-outline btn-sm" onClick={refreshData} disabled={loading}>
+              <RefreshCw size={14} aria-hidden="true" />
+              <span>Refresh</span>
+            </button>
+            <button type="button" className="btn btn-outline btn-sm" onClick={onLogout}>
+              <LogOut size={14} aria-hidden="true" />
+              <span>Log out</span>
+            </button>
+          </div>
+        </header>
 
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button className="btn btn-outline btn-sm" onClick={refreshData}>
-              <RefreshCw size={14} />
-              <span>Refresh Data</span>
+        <div className="tab-list" role="tablist" aria-label="Admin sections">
+          {[
+            { id: 'overview', label: 'Overview', icon: HardDrive },
+            { id: 'projects', label: `Projects (${projects.length})`, icon: Layers },
+            { id: 'blog', label: `Blog (${posts.length})`, icon: FileText },
+            { id: 'messages', label: `Messages (${unreadCount} unread)`, icon: Mail },
+            { id: 'media', label: 'Media', icon: Image },
+          ].map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              id={`admin-tab-${id}`}
+              aria-selected={activeTab === id}
+              aria-controls={`admin-panel-${id}`}
+              className={`tab-btn ${activeTab === id ? 'active' : ''}`}
+              onClick={() => setActiveTab(id)}
+            >
+              <Icon size={14} style={{ marginRight: '0.4rem', display: 'inline' }} aria-hidden="true" />
+              {label}
             </button>
-            <button className="btn btn-outline btn-sm" onClick={onLogout}>
-              <LogOut size={14} />
-              <span>Log Out</span>
-            </button>
-          </div>
+          ))}
         </div>
 
-        {/* Dashboard Tabs */}
-        <div className="tab-list">
-          <button className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
-            <HardDrive size={14} style={{ display: 'inline', marginRight: '0.4rem' }} />
-            Overview
-          </button>
-          <button className={`tab-btn ${activeTab === 'projects' ? 'active' : ''}`} onClick={() => setActiveTab('projects')}>
-            <Layers size={14} style={{ display: 'inline', marginRight: '0.4rem' }} />
-            Projects ({projects.length})
-          </button>
-          <button className={`tab-btn ${activeTab === 'blog' ? 'active' : ''}`} onClick={() => setActiveTab('blog')}>
-            <FileText size={14} style={{ display: 'inline', marginRight: '0.4rem' }} />
-            Blog ({posts.length})
-          </button>
-          <button className={`tab-btn ${activeTab === 'messages' ? 'active' : ''}`} onClick={() => setActiveTab('messages')}>
-            <Mail size={14} style={{ display: 'inline', marginRight: '0.4rem' }} />
-            Messages ({messages.length})
-          </button>
-          <button className={`tab-btn ${activeTab === 'media' ? 'active' : ''}`} onClick={() => setActiveTab('media')}>
-            <Image size={14} style={{ display: 'inline', marginRight: '0.4rem' }} />
-            Media & Storage
-          </button>
-        </div>
-
-        {/* Overview Tab */}
+        {/* Overview */}
         {activeTab === 'overview' && (
-          <div>
-            <div className="grid-3" style={{ marginBottom: '2.5rem' }}>
-              <div className="card">
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Published Projects</div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '700', color: 'var(--accent-primary)', margin: '0.4rem 0' }}>{publishedProjectsCount}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Drafts: {draftProjectsCount}</div>
+          <section id="admin-panel-overview" role="tabpanel" aria-labelledby="admin-tab-overview">
+            <div className="stat-grid">
+              <div className="stat-card">
+                <div className="stat-value">{projects.filter((p) => p.published).length}</div>
+                <div className="stat-label">Published projects</div>
               </div>
-
-              <div className="card">
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Published Articles</div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '700', color: 'var(--accent-indigo)', margin: '0.4rem 0' }}>{publishedPostsCount}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Drafts: {draftPostsCount}</div>
+              <div className="stat-card">
+                <div className="stat-value">{projects.filter((p) => !p.published).length}</div>
+                <div className="stat-label">Project drafts</div>
               </div>
-
-              <div className="card">
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Received Messages</div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '700', color: 'var(--accent-emerald)', margin: '0.4rem 0' }}>{messages.length}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Contact form submissions</div>
+              <div className="stat-card">
+                <div className="stat-value">{posts.filter((p) => p.published).length}</div>
+                <div className="stat-label">Published posts</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{posts.filter((p) => !p.published).length}</div>
+                <div className="stat-label">Post drafts</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{unreadCount}</div>
+                <div className="stat-label">Unread messages</div>
               </div>
             </div>
 
-            <div className="card">
-              <h3 style={{ fontSize: '1.15rem', marginBottom: '1rem' }}>System Status & Activity</h3>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.9rem' }}>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CheckCircle size={16} style={{ color: 'var(--accent-emerald)' }} />
-                  <span>Firestore Data Engine: Nominal / Operating</span>
-                </li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CheckCircle size={16} style={{ color: 'var(--accent-emerald)' }} />
-                  <span>Firebase Authentication: Active</span>
-                </li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CheckCircle size={16} style={{ color: 'var(--accent-primary)' }} />
-                  <span>VertexOne Capstone Deliverables: 14 Artifacts Online</span>
-                </li>
-              </ul>
-            </div>
-          </div>
+            <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Recent messages</h2>
+            {messages.slice(0, 5).map((msg) => (
+              <div key={msg.id} className={`admin-row ${msg.read ? '' : 'message-item unread'}`}>
+                <div>
+                  <h4>{msg.subject || 'No subject'}</h4>
+                  <div className="admin-row-meta">
+                    <span>{msg.name}</span>
+                    <span>{msg.email}</span>
+                    <span>{formatDate(msg.createdAt)}</span>
+                  </div>
+                </div>
+                <button type="button" className="btn btn-outline btn-sm" onClick={() => setActiveTab('messages')}>
+                  View
+                </button>
+              </div>
+            ))}
+            {messages.length === 0 && <p className="empty-state">No messages yet.</p>}
+          </section>
         )}
 
-        {/* Projects Tab */}
+        {/* Projects */}
         {activeTab === 'projects' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3>Projects & Case Studies</h3>
-              <button 
-                className="btn btn-accent btn-sm"
-                onClick={() => setEditingProject({ title: '', slug: '', summary: '', category: 'GRC', published: true, featured: false, frameworks: [], deliverables: [] })}
-              >
-                <Plus size={14} />
-                <span>New Project</span>
+          <section id="admin-panel-projects" role="tabpanel" aria-labelledby="admin-tab-projects">
+            <div className="section-head">
+              <h2 style={{ fontSize: '1.1rem' }}>Projects</h2>
+              <button type="button" className="btn btn-accent btn-sm" onClick={() => setEditingProject({ ...EMPTY_PROJECT })}>
+                <Plus size={14} aria-hidden="true" />
+                <span>New project</span>
               </button>
             </div>
 
             {editingProject && (
-              <div className="card" style={{ marginBottom: '2rem', border: '1px solid var(--accent-primary)' }}>
-                <h4 style={{ color: 'var(--accent-primary)', marginBottom: '1rem' }}>
-                  {editingProject.id ? 'Edit Project' : 'Create Project'}
-                </h4>
-                <form onSubmit={handleSaveProjectForm}>
-                  <div className="grid-2">
-                    <div className="form-group">
-                      <label className="form-label">Project Title</label>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        required 
-                        value={editingProject.title} 
-                        onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })} 
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Slug</label>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        required 
-                        value={editingProject.slug} 
-                        onChange={(e) => setEditingProject({ ...editingProject, slug: e.target.value })} 
-                      />
-                    </div>
-                  </div>
+              <form
+                className="card"
+                style={{ marginBottom: '2rem' }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  run(() => saveProject(editingProject), 'Project saved.').then(() => setEditingProject(null));
+                }}
+              >
+                <h3 style={{ fontSize: '1rem', marginBottom: '1.25rem' }}>
+                  {editingProject.id ? 'Edit project' : 'New project'}
+                </h3>
 
+                <div className="grid-2">
                   <div className="form-group">
-                    <label className="form-label">Summary</label>
-                    <textarea 
-                      className="form-textarea" 
-                      rows={3} 
-                      value={editingProject.summary || ''} 
-                      onChange={(e) => setEditingProject({ ...editingProject, summary: e.target.value })} 
+                    <label className="form-label" htmlFor="project-title">
+                      Title
+                    </label>
+                    <input
+                      id="project-title"
+                      className="form-input"
+                      required
+                      value={editingProject.title}
+                      onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
                     />
                   </div>
-
-                  <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={Boolean(editingProject.published)} 
-                        onChange={(e) => setEditingProject({ ...editingProject, published: e.target.checked })} 
-                      />
-                      <span>Published (Public)</span>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="project-slug">
+                      Slug
                     </label>
+                    <input
+                      id="project-slug"
+                      className="form-input"
+                      required
+                      value={editingProject.slug}
+                      onChange={(e) => setEditingProject({ ...editingProject, slug: e.target.value })}
+                    />
+                  </div>
+                </div>
 
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={Boolean(editingProject.featured)} 
-                        onChange={(e) => setEditingProject({ ...editingProject, featured: e.target.checked })} 
-                      />
-                      <span>Featured</span>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="project-summary">
+                    Summary
+                  </label>
+                  <textarea
+                    id="project-summary"
+                    className="form-textarea"
+                    rows={3}
+                    value={editingProject.summary || ''}
+                    onChange={(e) => setEditingProject({ ...editingProject, summary: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="project-category">
+                      Category
                     </label>
+                    <input
+                      id="project-category"
+                      className="form-input"
+                      value={editingProject.category || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
+                    />
                   </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="project-github">
+                      GitHub URL
+                    </label>
+                    <input
+                      id="project-github"
+                      type="url"
+                      className="form-input"
+                      value={editingProject.githubUrl || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, githubUrl: e.target.value })}
+                    />
+                  </div>
+                </div>
 
-                  <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <button type="submit" className="btn btn-accent btn-sm">
-                      <Save size={14} />
-                      <span>Save Project</span>
-                    </button>
-                    <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditingProject(null)}>
-                      Cancel
-                    </button>
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="project-docs">
+                      Artifact / documentation URL
+                    </label>
+                    <input
+                      id="project-docs"
+                      type="url"
+                      className="form-input"
+                      value={editingProject.documentationUrl || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, documentationUrl: e.target.value })}
+                    />
                   </div>
-                </form>
-              </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="project-image">
+                      Cover image URL
+                    </label>
+                    <input
+                      id="project-image"
+                      type="url"
+                      className="form-input"
+                      value={editingProject.coverImage || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, coverImage: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="project-frameworks">
+                    Frameworks (comma separated)
+                  </label>
+                  <input
+                    id="project-frameworks"
+                    className="form-input"
+                    value={(editingProject.frameworks || []).join(', ')}
+                    onChange={(e) => setEditingProject({ ...editingProject, frameworks: toList(e.target.value) })}
+                  />
+                </div>
+
+                <div className="admin-toolbar" style={{ marginBottom: '1.25rem', gap: '1.5rem' }}>
+                  <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(editingProject.published)}
+                      onChange={(e) => setEditingProject({ ...editingProject, published: e.target.checked })}
+                    />
+                    <span>Published</span>
+                  </label>
+                  <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(editingProject.featured)}
+                      onChange={(e) => setEditingProject({ ...editingProject, featured: e.target.checked })}
+                    />
+                    <span>Featured</span>
+                  </label>
+                </div>
+
+                <div className="admin-actions">
+                  <button type="submit" className="btn btn-accent btn-sm">
+                    <Save size={14} aria-hidden="true" />
+                    <span>Save project</span>
+                  </button>
+                  <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditingProject(null)}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
             )}
 
-            <div className="grc-table-container">
-              <table className="grc-table">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {projects.map((p) => (
-                    <tr key={p.id}>
-                      <td style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{p.title}</td>
-                      <td><span className="badge">{p.category}</span></td>
-                      <td>{p.published ? <span className="badge badge-emerald">Published</span> : <span className="badge badge-amber">Draft</span>}</td>
-                      <td>
-                        <button className="btn btn-outline btn-sm" style={{ padding: '0.2rem 0.5rem' }} onClick={() => setEditingProject(p)}>
-                          <Edit size={12} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+            {projects.map((project) => (
+              <div key={project.id} className="admin-row">
+                <div>
+                  <h4>{project.title}</h4>
+                  <div className="admin-row-meta">
+                    <span>{project.category}</span>
+                    <span>{project.published ? 'Published' : 'Draft'}</span>
+                    {project.featured && <span>Featured</span>}
+                  </div>
+                </div>
+                <div className="admin-actions">
+                  <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditingProject(project)}>
+                    <Edit size={12} aria-hidden="true" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={() =>
+                      run(
+                        () => setProjectFlag(project.id, 'published', !project.published),
+                        project.published ? 'Unpublished.' : 'Published.'
+                      )
+                    }
+                  >
+                    {project.published ? 'Unpublish' : 'Publish'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={() => run(() => setProjectFlag(project.id, 'featured', !project.featured), 'Updated.')}
+                  >
+                    {project.featured ? 'Unfeature' : 'Feature'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-danger"
+                    onClick={() => confirmThen(`Delete "${project.title}"?`, () => deleteProject(project.id))}
+                  >
+                    <Trash2 size={12} aria-hidden="true" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </section>
         )}
 
-        {/* Blog Tab */}
+        {/* Blog */}
         {activeTab === 'blog' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3>Journal Articles</h3>
-              <button 
-                className="btn btn-accent btn-sm"
-                onClick={() => setEditingPost({ title: '', slug: '', excerpt: '', content: '', category: 'GRC', published: true, readingTime: '5 min read' })}
-              >
-                <Plus size={14} />
-                <span>New Post</span>
+          <section id="admin-panel-blog" role="tabpanel" aria-labelledby="admin-tab-blog">
+            <div className="section-head">
+              <h2 style={{ fontSize: '1.1rem' }}>Blog posts</h2>
+              <button type="button" className="btn btn-accent btn-sm" onClick={() => setEditingPost({ ...EMPTY_POST })}>
+                <Plus size={14} aria-hidden="true" />
+                <span>New post</span>
               </button>
             </div>
 
             {editingPost && (
-              <div className="card" style={{ marginBottom: '2rem', border: '1px solid var(--accent-indigo)' }}>
-                <h4 style={{ color: 'var(--accent-indigo)', marginBottom: '1rem' }}>
-                  {editingPost.id ? 'Edit Article' : 'Write New Article'}
-                </h4>
-                <form onSubmit={handleSavePostForm}>
-                  <div className="grid-2">
-                    <div className="form-group">
-                      <label className="form-label">Article Title</label>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        required 
-                        value={editingPost.title} 
-                        onChange={(e) => setEditingPost({ ...editingPost, title: e.target.value })} 
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Slug</label>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        required 
-                        value={editingPost.slug} 
-                        onChange={(e) => setEditingPost({ ...editingPost, slug: e.target.value })} 
-                      />
-                    </div>
-                  </div>
+              <form
+                className="card"
+                style={{ marginBottom: '2rem' }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  run(() => saveBlogPost(editingPost), 'Post saved.').then(() => setEditingPost(null));
+                }}
+              >
+                <h3 style={{ fontSize: '1rem', marginBottom: '1.25rem' }}>{editingPost.id ? 'Edit post' : 'New post'}</h3>
 
+                <div className="grid-2">
                   <div className="form-group">
-                    <label className="form-label">Excerpt</label>
-                    <textarea 
-                      className="form-textarea" 
-                      rows={2} 
-                      value={editingPost.excerpt || ''} 
-                      onChange={(e) => setEditingPost({ ...editingPost, excerpt: e.target.value })} 
+                    <label className="form-label" htmlFor="post-title">
+                      Title
+                    </label>
+                    <input
+                      id="post-title"
+                      className="form-input"
+                      required
+                      value={editingPost.title}
+                      onChange={(e) => setEditingPost({ ...editingPost, title: e.target.value })}
                     />
                   </div>
-
                   <div className="form-group">
-                    <label className="form-label">Content (Markdown)</label>
-                    <textarea 
-                      className="form-textarea" 
-                      rows={8} 
-                      value={editingPost.content || ''} 
-                      onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })} 
+                    <label className="form-label" htmlFor="post-slug">
+                      Slug
+                    </label>
+                    <input
+                      id="post-slug"
+                      className="form-input"
+                      required
+                      value={editingPost.slug}
+                      onChange={(e) => setEditingPost({ ...editingPost, slug: e.target.value })}
                     />
                   </div>
+                </div>
 
-                  <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <button type="submit" className="btn btn-accent btn-sm">
-                      <Save size={14} />
-                      <span>Save Article</span>
-                    </button>
-                    <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditingPost(null)}>
-                      Cancel
-                    </button>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="post-excerpt">
+                    Excerpt
+                  </label>
+                  <textarea
+                    id="post-excerpt"
+                    className="form-textarea"
+                    rows={2}
+                    value={editingPost.excerpt || ''}
+                    onChange={(e) => setEditingPost({ ...editingPost, excerpt: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="post-content">
+                    Content (### headings, * bullets, blank-line paragraphs)
+                  </label>
+                  <textarea
+                    id="post-content"
+                    className="form-textarea"
+                    rows={10}
+                    value={editingPost.content || ''}
+                    onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="post-category">
+                      Category
+                    </label>
+                    <input
+                      id="post-category"
+                      className="form-input"
+                      value={editingPost.category || ''}
+                      onChange={(e) => setEditingPost({ ...editingPost, category: e.target.value })}
+                    />
                   </div>
-                </form>
-              </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="post-tags">
+                      Tags (comma separated)
+                    </label>
+                    <input
+                      id="post-tags"
+                      className="form-input"
+                      value={(editingPost.tags || []).join(', ')}
+                      onChange={(e) => setEditingPost({ ...editingPost, tags: toList(e.target.value) })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="post-cover">
+                      Cover image URL
+                    </label>
+                    <input
+                      id="post-cover"
+                      type="url"
+                      className="form-input"
+                      value={editingPost.coverImage || ''}
+                      onChange={(e) => setEditingPost({ ...editingPost, coverImage: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="post-reading">
+                      Reading time
+                    </label>
+                    <input
+                      id="post-reading"
+                      className="form-input"
+                      value={editingPost.readingTime || ''}
+                      onChange={(e) => setEditingPost({ ...editingPost, readingTime: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="post-seo-title">
+                      SEO title
+                    </label>
+                    <input
+                      id="post-seo-title"
+                      className="form-input"
+                      value={editingPost.seoTitle || ''}
+                      onChange={(e) => setEditingPost({ ...editingPost, seoTitle: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="post-seo-description">
+                      SEO description
+                    </label>
+                    <input
+                      id="post-seo-description"
+                      className="form-input"
+                      value={editingPost.seoDescription || ''}
+                      onChange={(e) => setEditingPost({ ...editingPost, seoDescription: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-toolbar" style={{ marginBottom: '1.25rem', gap: '1.5rem' }}>
+                  <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(editingPost.published)}
+                      onChange={(e) => setEditingPost({ ...editingPost, published: e.target.checked })}
+                    />
+                    <span>Published</span>
+                  </label>
+                  <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(editingPost.featured)}
+                      onChange={(e) => setEditingPost({ ...editingPost, featured: e.target.checked })}
+                    />
+                    <span>Featured</span>
+                  </label>
+                </div>
+
+                <div className="admin-actions">
+                  <button type="submit" className="btn btn-accent btn-sm">
+                    <Save size={14} aria-hidden="true" />
+                    <span>Save post</span>
+                  </button>
+                  <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditingPost(null)}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
             )}
 
-            <div className="grc-table-container">
-              <table className="grc-table">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Reading Time</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {posts.map((post) => (
-                    <tr key={post.id}>
-                      <td style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{post.title}</td>
-                      <td><span className="badge badge-indigo">{post.category}</span></td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>{post.readingTime}</td>
-                      <td>{post.published ? <span className="badge badge-emerald">Published</span> : <span className="badge">Draft</span>}</td>
-                      <td>
-                        <button className="btn btn-outline btn-sm" style={{ padding: '0.2rem 0.5rem' }} onClick={() => setEditingPost(post)}>
-                          <Edit size={12} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+            {posts.map((post) => (
+              <div key={post.id} className="admin-row">
+                <div>
+                  <h4>{post.title}</h4>
+                  <div className="admin-row-meta">
+                    <span>{post.category}</span>
+                    <span>{post.published ? 'Published' : 'Draft'}</span>
+                    {post.featured && <span>Featured</span>}
+                    <span>{formatDate(post.publishedAt)}</span>
+                  </div>
+                </div>
+                <div className="admin-actions">
+                  <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditingPost(post)}>
+                    <Edit size={12} aria-hidden="true" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={() =>
+                      run(
+                        () => setBlogPostFlag(post.id, 'published', !post.published),
+                        post.published ? 'Unpublished.' : 'Published.'
+                      )
+                    }
+                  >
+                    {post.published ? 'Unpublish' : 'Publish'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={() => run(() => setBlogPostFlag(post.id, 'featured', !post.featured), 'Updated.')}
+                  >
+                    {post.featured ? 'Unfeature' : 'Feature'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-danger"
+                    onClick={() => confirmThen(`Delete "${post.title}"?`, () => deleteBlogPost(post.id))}
+                  >
+                    <Trash2 size={12} aria-hidden="true" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </section>
         )}
 
-        {/* Messages Tab */}
+        {/* Messages */}
         {activeTab === 'messages' && (
-          <div>
-            <h3 style={{ marginBottom: '1.5rem' }}>Contact Form Submissions</h3>
+          <section id="admin-panel-messages" role="tabpanel" aria-labelledby="admin-tab-messages">
+            <h2 style={{ fontSize: '1.1rem', marginBottom: '1.5rem' }}>Contact messages</h2>
             {messages.length === 0 ? (
-              <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
-                <p style={{ color: 'var(--text-muted)' }}>No messages received yet.</p>
-              </div>
+              <p className="empty-state">No messages received yet.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                {messages.map((msg) => (
-                  <div key={msg.id} className="card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                      <div>
-                        <h4 style={{ color: 'var(--accent-primary)', fontSize: '1.1rem' }}>{msg.subject || 'General Inquiry'}</h4>
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                          From: <strong>{msg.name}</strong> (&lt;{msg.email}&gt;) {msg.company ? `• ${msg.company}` : ''}
-                        </div>
-                      </div>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                        {msg.createdAt}
-                      </span>
+              messages.map((msg) => (
+                <article key={msg.id} className={`admin-row ${msg.read ? '' : 'message-item unread'}`}>
+                  <div style={{ maxWidth: '48rem' }}>
+                    <h4>{msg.subject || 'No subject'}</h4>
+                    <div className="admin-row-meta">
+                      <span>{msg.name}</span>
+                      <a href={`mailto:${msg.email}`}>{msg.email}</a>
+                      <span>{formatDate(msg.createdAt)}</span>
+                      <span>{msg.read ? 'Read' : 'Unread'}</span>
                     </div>
-                    <p style={{ fontSize: '0.925rem', whiteSpace: 'pre-wrap', background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
-                      {msg.message}
-                    </p>
+                    <p style={{ whiteSpace: 'pre-wrap', marginTop: '0.75rem', fontSize: '0.9rem' }}>{msg.message}</p>
                   </div>
-                ))}
-              </div>
+                  <div className="admin-actions">
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-sm"
+                      onClick={() => run(() => setMessageRead(msg.id, !msg.read), 'Updated.')}
+                    >
+                      Mark {msg.read ? 'unread' : 'read'}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-danger"
+                      onClick={() => confirmThen('Delete this message?', () => deleteContactMessage(msg.id))}
+                    >
+                      <Trash2 size={12} aria-hidden="true" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </article>
+              ))
             )}
-          </div>
+          </section>
         )}
 
-        {/* Media Management Tab */}
+        {/* Media */}
         {activeTab === 'media' && (
-          <div>
-            <h3 style={{ marginBottom: '1.5rem' }}>Media & Artifact Storage (Firebase Storage)</h3>
-            <div className="card" style={{ maxWidth: '600px', marginBottom: '2rem' }}>
-              <h4 style={{ marginBottom: '0.75rem' }}>Upload Public Asset</h4>
+          <section id="admin-panel-media" role="tabpanel" aria-labelledby="admin-tab-media">
+            <h2 style={{ fontSize: '1.1rem', marginBottom: '1.5rem' }}>Media &amp; artifacts</h2>
+            <div className="card" style={{ maxWidth: '38rem' }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem' }}>Upload a public asset</h3>
               <p style={{ fontSize: '0.875rem', marginBottom: '1.25rem' }}>
-                Upload cover images, diagrams, or PDF report evidence (Max file size: 10MB).
+                Images or PDFs up to 10 MB. Uploads go to <code>public/</code> in Firebase Storage and are
+                world-readable; write access is restricted to the admin account by the storage rules.
               </p>
-              
+
               <div className="form-group">
-                <input 
-                  type="file" 
-                  accept="image/*,.pdf" 
-                  onChange={handleFileUpload} 
-                  className="form-input" 
+                <label className="form-label" htmlFor="media-file">
+                  Select file
+                </label>
+                <input
+                  id="media-file"
+                  type="file"
+                  className="form-input"
+                  accept="image/*,application/pdf"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploadedUrl('');
+                    if (file.size > 10 * 1024 * 1024) {
+                      setUploadStatus('File exceeds the 10 MB limit.');
+                      return;
+                    }
+                    if (!storage) {
+                      setUploadStatus('Firebase Storage is not configured in this environment.');
+                      return;
+                    }
+                    setUploadStatus('Uploading…');
+                    try {
+                      const fileRef = ref(storage, `public/${Date.now()}_${file.name}`);
+                      await uploadBytes(fileRef, file);
+                      const url = await getDownloadURL(fileRef);
+                      setUploadedUrl(url);
+                      setUploadStatus('Upload complete.');
+                    } catch (err) {
+                      setUploadStatus(`Upload failed: ${err.message}`);
+                    }
+                  }}
                 />
               </div>
 
               {uploadStatus && (
-                <div style={{ fontSize: '0.875rem', color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)', marginTop: '0.5rem', wordBreak: 'break-all' }}>
-                  {uploadStatus}
-                </div>
+                <p style={{ fontSize: '0.85rem' }} role="status">
+                  <Upload size={14} aria-hidden="true" /> {uploadStatus}
+                </p>
+              )}
+              {uploadedUrl && (
+                <p style={{ fontSize: '0.85rem', wordBreak: 'break-all' }}>
+                  <a href={uploadedUrl} target="_blank" rel="noopener noreferrer">
+                    {uploadedUrl}
+                  </a>
+                </p>
               )}
             </div>
-          </div>
+          </section>
         )}
       </div>
     </div>
