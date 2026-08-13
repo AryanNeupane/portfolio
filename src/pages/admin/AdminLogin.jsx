@@ -22,10 +22,15 @@ export default function AdminLogin({ onNavigate }) {
 
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
+      // Wait a moment for onAuthStateChanged to process. If it doesn't unmount us (because they aren't admin), reset loading.
+      setTimeout(() => {
+        setStatus(prev => prev.loading ? { loading: false, error: 'Authentication successful, but you are not authorized as an administrator.' } : prev);
+      }, 2000);
     } catch (err) {
+      console.error("Firebase Auth Error:", err);
       setStatus({
         loading: false,
-        error: err.code?.startsWith('auth/') ? 'Invalid email or password.' : err.message,
+        error: `Firebase Auth Error: ${err.code || err.message}`,
       });
     }
   };
@@ -88,7 +93,7 @@ export default function AdminLogin({ onNavigate }) {
                 required
                 autoComplete="username"
                 className="form-input"
-                placeholder="contact@aryanneupane.com.np"
+                placeholder="official.aryanneupane@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />

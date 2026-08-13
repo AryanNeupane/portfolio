@@ -16,7 +16,8 @@ import PageMeta from './components/PageMeta';
 import ScrollToTop from './components/ScrollToTop';
 import { ToastProvider } from './components/Toast';
 import { getInitialTheme, applyTheme, initThemeListeners } from './utils/theme';
-import { auth } from './services/firebase';
+import { auth, db } from './services/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const ROUTE_META = {
   '/': {
@@ -66,8 +67,26 @@ export default function App() {
 
     let unsubscribe = () => {};
     if (auth) {
-      unsubscribe = onAuthStateChanged(auth, (user) => {
-        setIsAdminAuthenticated(Boolean(user));
+      unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          try {
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            
+            if (userDoc.exists() && userDoc.data().role === 'admin') {
+              setIsAdminAuthenticated(true);
+            } else {
+              // Valid login but not an admin
+              setIsAdminAuthenticated(false);
+              // Optionally sign them out since this app is only for admins
+              // await signOut(auth);
+            }
+          } catch (err) {
+            console.error("Authorization check failed:", err);
+            setIsAdminAuthenticated(false);
+          }
+        } else {
+          setIsAdminAuthenticated(false);
+        }
         setAuthReady(true);
       });
     } else {

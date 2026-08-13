@@ -14,8 +14,7 @@ export const PERSONAL_PROFILE = {
     status: "Ongoing Studies"
   },
   emails: [
-    "contact@aryanneupane.com.np",
-    "email@aryanneupane.com"
+    "official.aryanneupane@gmail.com"
   ],
   socialLinks: {
     github: "https://github.com/AryanNeupane",
