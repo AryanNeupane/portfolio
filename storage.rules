@@ -3,14 +3,11 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
+    // Mirrors the Firestore rule: admin status comes from users/{uid}.role == "admin".
     function isAdmin() {
-      return request.auth != null && (
-        request.auth.uid == "ADMIN_USER_ID_PLACEHOLDER" ||
-        (
-          firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
-          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == "admin"
-        )
-      );
+      return request.auth != null &&
+        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == "admin";
     }
 
     function isValidUpload() {

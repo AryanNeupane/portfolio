@@ -1,123 +1,108 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, ChevronRight, Filter, Search, Award } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { getProjects } from '../services/dataService';
 
 export default function PortfolioPage({ onNavigate }) {
   const [projects, setProjects] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('All');
 
   useEffect(() => {
-    async function fetchProjects() {
+    let cancelled = false;
+    async function loadProjects() {
       try {
         const data = await getProjects();
-        setProjects(data);
+        if (!cancelled) setProjects(data);
       } catch (err) {
-        console.error("Failed to fetch projects:", err);
+        console.error('Failed to load projects:', err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
-    fetchProjects();
+    loadProjects();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const categories = ['All', 'GRC', 'SOC', 'Vulnerability'];
+  const categories = useMemo(() => ['All', ...new Set(projects.map((p) => p.category))], [projects]);
 
-  const filteredProjects = projects.filter(p => {
-    if (selectedCategory === 'All') return true;
-    return p.category.toLowerCase().includes(selectedCategory.toLowerCase());
-  });
+  const visibleProjects = useMemo(
+    () => (activeCategory === 'All' ? projects : projects.filter((p) => p.category === activeCategory)),
+    [projects, activeCategory]
+  );
 
   return (
     <div className="portfolio-page section">
       <div className="container">
-        <div style={{ maxWidth: '850px', marginBottom: '3rem' }}>
-          <div className="badge badge-blue" style={{ marginBottom: '1rem' }}>Security Portfolio</div>
-          <h1 style={{ marginBottom: '1rem' }}>Projects & GRC Deliverables</h1>
-          <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
-            Demonstrating hands-on cybersecurity capabilities, governance framework implementations, and practical risk assessment deliverables.
+        <header className="page-head">
+          <p className="eyebrow">Portfolio</p>
+          <h1>Documented security &amp; GRC work</h1>
+          <p className="page-lead">
+            Each project links to the repository that holds its artefacts. Simulated work is labelled as simulated.
           </p>
-        </div>
+        </header>
 
-        {/* Category Filters */}
-        <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              className={`btn btn-sm ${selectedCategory === cat ? 'btn-accent' : 'btn-outline'}`}
-              onClick={() => setSelectedCategory(cat)}
-            >
-              {cat === 'All' ? 'All Projects' : `${cat} Focus`}
-            </button>
-          ))}
-        </div>
+        {categories.length > 2 && (
+          <div className="filter-row" role="group" aria-label="Filter projects by category">
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                className="filter-chip"
+                aria-pressed={activeCategory === category}
+                onClick={() => setActiveCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* Projects Grid */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          {filteredProjects.map((project) => (
-            <div 
-              key={project.id} 
-              className="card"
-              style={{ 
-                border: project.isCapstone ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid var(--border-color)',
-                background: project.isCapstone ? 'rgba(15, 23, 42, 0.9)' : 'var(--bg-card)'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
-                <div>
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                    {project.isCapstone && <span className="badge badge-blue">Simulated Enterprise Capstone</span>}
-                    <span className="badge badge-indigo">{project.category}</span>
-                  </div>
-                  <h2 style={{ fontSize: '1.5rem', color: 'var(--text-primary)' }}>{project.title}</h2>
+        {loading ? (
+          <p className="empty-state">Loading projects…</p>
+        ) : visibleProjects.length === 0 ? (
+          <p className="empty-state">No projects in this category yet.</p>
+        ) : (
+          <div className="work-list">
+            {visibleProjects.map((project) => (
+              <a
+                key={project.id}
+                href={`/portfolio/${project.slug}`}
+                className="work-item"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate(`/portfolio/${project.slug}`);
+                }}
+              >
+                <div className="work-item-meta">
+                  <span>{project.category}</span>
+                  <span>{project.createdAt}</span>
+                  {project.isCapstone && <span className="badge badge-amber">Simulated capstone</span>}
                 </div>
-
-                <button 
-                  className="btn btn-sm btn-accent"
-                  onClick={() => onNavigate(`/portfolio/${project.slug}`)}
-                >
-                  <span>Inspect Artifacts</span>
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-
-              <p style={{ marginBottom: '1.5rem', fontSize: '0.95rem' }}>
-                {project.summary}
-              </p>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem', background: 'var(--bg-tertiary)', padding: '1.25rem', borderRadius: 'var(--radius-md)' }}>
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Frameworks Aligned</span>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: '500', marginTop: '0.2rem' }}>
-                    {project.frameworks ? project.frameworks.join(' • ') : 'N/A'}
-                  </div>
-                </div>
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Key Deliverables</span>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: '500', marginTop: '0.2rem' }}>
-                    {project.deliverables ? `${project.deliverables.length} Documented Artifacts` : 'Standard Technical Documentation'}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                  {project.technologies?.map((tech, tIdx) => (
-                    <span key={tIdx} className="badge">{tech}</span>
+                <h2 className="work-item-title">{project.title}</h2>
+                <p className="work-item-summary">{project.summary}</p>
+                <div className="tag-row">
+                  {project.frameworks?.map((framework) => (
+                    <span key={framework} className="badge">
+                      {framework}
+                    </span>
                   ))}
+                  {project.deliverables?.length > 0 && (
+                    <span className="badge badge-emerald">{project.deliverables.length} deliverables</span>
+                  )}
                 </div>
-
-                <button 
-                  style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', cursor: 'pointer', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                  onClick={() => onNavigate(`/portfolio/${project.slug}`)}
+                <span
+                  className="link-inline"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginTop: '1rem', fontSize: '0.875rem' }}
                 >
-                  <span>View Project Details & Artifacts</span>
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+                  Read case study
+                  <ArrowRight size={14} aria-hidden="true" />
+                </span>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

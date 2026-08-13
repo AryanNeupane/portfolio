@@ -1,84 +1,88 @@
-# Aryan Neupane — Cybersecurity & GRC Portfolio Platform
+# Aryan Neupane — Cybersecurity & GRC Portfolio
 
-A dynamic, evidence-based personal portfolio platform built for **Aryan Neupane**, showcasing technical security capabilities, governance management systems (ISO/IEC 27001:2022), risk assessment frameworks (NIST CSF 2.0), and practical security operations.
-
----
-
-## 1. Platform Architecture
-
-The platform is designed as a modern Single-Page Application (SPA) backed by Firebase Spark tier services:
-
-* **Frontend Engine**: Vite + React + Lucide Icons + Custom CSS Design Tokens.
-* **Backend Services (Firebase Spark Plan - 100% Free)**:
-  * **Firebase Authentication**: Email & Password authentication for administrative content management.
-  * **Cloud Firestore**: Dynamic NoSQL database for projects, GRC deliverables, journal articles, contact submissions, and security audit logs.
-  * **Firebase Storage**: Asset and artifact document hosting (PDFs, diagrams, report evidence).
-  * **Firebase Hosting**: High-performance static content delivery with strict Security Headers.
+Personal portfolio for early-career cybersecurity and GRC work: ISO/IEC 27001:2022 and NIST CSF 2.0 practice, a simulated enterprise GRC capstone, a Splunk SOC home lab, and web/API security testing reports.
 
 ---
 
-## 2. Dynamic Routes & Features
+## 1. Stack
 
-* `/` — **Homepage**: Positioning hero, core progression architecture (*Technical Labs → Internship → GRC Mentorship → Enterprise Capstone*), certifications, featured VertexOne GRC Capstone preview, and recent articles.
-* `/about` — **About & Philosophy**: Narrative profile, BIM studies under Tribhuvan University, Synthbit Technologies internship, GRC mentorship under Sandeep Sharma (CTO, Synthbit Technologies), and practical lab experience.
-* `/portfolio` — **Portfolio Index**: Categorized project showcase (ISO 27001, NIST CSF 2.0, SOC Operations, Vulnerability Assessment).
-* `/portfolio/vertexone-enterprise-grc-assessment` — **Primary Capstone View**: Interactive GRC Artifact Explorer (ISMS Scope, Risk Register, Statement of Applicability, Control Ownership Matrix, NIST CSF 2.0 Maturity Dashboard).
-* `/blog` & `/blog/[slug]` — **Journal & Articles**: Technical writing on ISO 27001 risk registers, NIST CSF mapping, and SOC Splunk telemetry.
-* `/contact` — **Contact System**: Direct email links (`contact@aryanneupane.com.np`, `email@aryanneupane.com`) and interactive contact form with honeypot bot defense.
-* `/admin` & `/admin/dashboard` — **Administrative CMS**: Secure management interface for creating/editing projects, publishing blog posts, inspecting contact messages, and viewing audit logs.
+* **Frontend**: Vite + React 18, Lucide icons, vanilla CSS design tokens (dark default, light and system themes).
+* **Backend (Firebase Spark tier)**:
+  * **Authentication** — email/password sign-in for the admin CMS.
+  * **Cloud Firestore** — projects, blog posts and contact messages.
+  * **Storage** — images and artifact PDFs.
+  * **Hosting** — static delivery with SPA rewrites and security headers.
+* **Contact delivery**: EmailJS, called directly from the browser.
+
+When the `VITE_FIREBASE_*` variables are absent the app runs in **local content mode**: it reads the seed content in `src/data/seedData.js` and persists admin edits to `localStorage`. This is for local development only.
 
 ---
 
-## 3. Environment Variables
+## 2. Routes
 
-Create a `.env` file in the root directory for live Firebase project integration (or rely on default fallback mode for local offline development):
+| Route | Purpose |
+| :--- | :--- |
+| `/` | Hero, selected work, summary, progression, capstone, certifications, posts, contact CTA |
+| `/about` | Background, experience, education, certification status, practice repositories |
+| `/portfolio` | Filterable project index |
+| `/portfolio/[slug]` | Case study: objective, context, methodology, frameworks, artifacts, evidence, lessons |
+| `/blog`, `/blog/[slug]` | Writing on risk registers, framework mapping and detection engineering |
+| `/contact` | EmailJS-backed contact form |
+| `/admin/login`, `/admin/dashboard` | CMS for projects, posts, messages and media |
+
+The VertexOne case study is a **simulated** enterprise GRC capstone and is labelled as such throughout the site.
+
+---
+
+## 3. Environment variables
+
+Copy `.env.example` to `.env` and fill in values. Never commit `.env`.
 
 ```env
-VITE_FIREBASE_API_KEY=your_api_key_here
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+
+VITE_EMAILJS_SERVICE_ID=
+VITE_EMAILJS_TEMPLATE_ID=
+VITE_EMAILJS_PUBLIC_KEY=
 ```
+
+All of these are public browser identifiers; access control is enforced by the Firestore/Storage rules (see `SECURITY.md`).
 
 ---
 
-## 4. Local Development & Build
+## 4. Local development
 
-### Install Dependencies
 ```bash
 npm install
+npm run dev      # dev server
+npm run build    # production bundle in dist/
+npm run preview  # serve the built bundle
 ```
 
-### Start Local Development Server
-```bash
-npm run dev
-```
+There is currently no lint or typecheck script in `package.json`.
 
-### Build Production Bundle
+---
+
+## 5. Admin setup
+
+1. Create an email/password user in Firebase Authentication.
+2. In Firestore, create `users/{uid}` with `{ "role": "admin" }` for that user's UID.
+
+Step 2 is required — authentication alone grants no write access. See `SECURITY.md` §2.
+
+---
+
+## 6. Deployment
+
 ```bash
 npm run build
+npx -y firebase-tools@latest hosting:channel:deploy preview   # temporary preview URL
+npx -y firebase-tools@latest deploy --only hosting,firestore:rules,storage
 ```
 
-The compiled production bundle will be generated in `dist/`.
-
----
-
-## 5. Deployment Instructions
-
-This platform deploys seamlessly to **Firebase Hosting** (or GitHub Pages / Cloudflare Pages) without incurring any billing account requirement.
-
-### Deploying via Firebase CLI
-```bash
-npx -y firebase-tools@latest deploy --only hosting
-```
-
----
-
-## 6. Source of Truth & Personal Branding
-
-* **Name**: Aryan Neupane
-* **Positioning**: Early-career Cybersecurity & GRC Specialist (BIM Student, TU).
-* **Primary Capstone**: VertexOne Digital Services — Enterprise GRC Assessment *(Simulated enterprise capstone project demonstrating practical GRC capabilities)*.
-* **Verified Emails**: `contact@aryanneupane.com.np`, `email@aryanneupane.com`.
+A `.firebaserc` (project alias) must exist or be supplied with `--project <id>`. The custom domain `aryanneupane.com.np` is managed through Cloudflare DNS and must not be pointed at Firebase until the preview has been reviewed.

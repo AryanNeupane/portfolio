@@ -1,153 +1,222 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Shield, CheckCircle2, AlertTriangle, FileText, Github, ExternalLink, Calendar, Layers } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowLeft, ExternalLink, Github } from 'lucide-react';
 import { getProjectBySlug } from '../services/dataService';
 import GrcArtifactViewer from '../components/GrcArtifactViewer';
+import PageMeta from '../components/PageMeta';
+
+const LIFECYCLE = ['Scope', 'Risk', 'Controls', 'Assessment', 'Treatment', 'Evidence', 'Continual improvement'];
 
 export default function ProjectDetailPage({ slug, onNavigate }) {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchProject() {
+    let cancelled = false;
+    async function loadProject() {
+      setLoading(true);
       try {
         const data = await getProjectBySlug(slug);
-        setProject(data);
+        if (!cancelled) setProject(data);
       } catch (err) {
-        console.error("Failed to load project:", err);
+        console.error('Failed to load project:', err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
-    fetchProject();
+    loadProject();
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   if (loading) {
     return (
-      <div className="section container" style={{ textAlign: 'center', padding: '6rem 0' }}>
-        <p style={{ color: 'var(--text-muted)' }}>Loading project details...</p>
+      <div className="section container">
+        <p className="empty-state">Loading project…</p>
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="section container" style={{ textAlign: 'center', padding: '6rem 0' }}>
-        <h2>Project Not Found</h2>
-        <p style={{ marginBottom: '2rem' }}>The requested project slug could not be located.</p>
-        <button className="btn btn-outline" onClick={() => onNavigate('/portfolio')}>
-          <ArrowLeft size={16} />
-          <span>Back to Portfolio</span>
-        </button>
+      <div className="section container">
+        <div className="empty-state">
+          <h2>Project not found</h2>
+          <p>The requested case study could not be located.</p>
+          <button type="button" className="btn btn-outline" onClick={() => onNavigate('/portfolio')}>
+            <ArrowLeft size={16} aria-hidden="true" />
+            <span>Back to portfolio</span>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="project-detail-page section">
+    <article className="project-detail-page section">
+      <PageMeta title={project.title} description={project.summary} path={`/portfolio/${project.slug}`} />
       <div className="container">
-        {/* Back Button */}
-        <button 
-          className="btn btn-outline btn-sm"
-          onClick={() => onNavigate('/portfolio')}
-          style={{ marginBottom: '2rem' }}
+        <a
+          href="/portfolio"
+          className="back-link"
+          onClick={(e) => {
+            e.preventDefault();
+            onNavigate('/portfolio');
+          }}
         >
-          <ArrowLeft size={14} />
-          <span>Back to Portfolio</span>
-        </button>
+          <ArrowLeft size={14} aria-hidden="true" />
+          <span>All projects</span>
+        </a>
 
-        {/* Header */}
-        <div style={{ maxWidth: '900px', marginBottom: '3rem' }}>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-            {project.isCapstone && <span className="badge badge-blue">Simulated Enterprise Capstone</span>}
-            <span className="badge badge-indigo">{project.category}</span>
-          </div>
+        <header className="page-head">
+          <p className="eyebrow">{project.category}</p>
+          <h1>{project.title}</h1>
+          <p className="page-lead">{project.summary}</p>
 
-          <h1 style={{ marginBottom: '1.25rem' }}>{project.title}</h1>
-          <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-            {project.summary}
-          </p>
-
-          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Calendar size={14} />
-              <span>Created: {project.createdAt}</span>
-            </div>
+          <div className="detail-meta">
+            {project.createdAt && <span>{project.createdAt}</span>}
             {project.githubUrl && (
-              <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--accent-blue)' }}>
-                <Github size={14} />
-                <span>GitHub Repository</span>
-                <ExternalLink size={12} />
+              <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">
+                <Github size={14} aria-hidden="true" />
+                Repository
+              </a>
+            )}
+            {project.documentationUrl && (
+              <a href={project.documentationUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink size={14} aria-hidden="true" />
+                Additional documentation
               </a>
             )}
           </div>
-        </div>
+        </header>
 
-        {/* VertexOne Disclaimers / Context if Capstone */}
-        {project.isCapstone && (
-          <div className="card" style={{ marginBottom: '2.5rem', borderLeft: '4px solid var(--accent-blue)', background: 'var(--bg-secondary)' }}>
-            <h4 style={{ color: 'var(--accent-blue)', marginBottom: '0.4rem' }}>Capstone Project Taxonomy & Evidence Statement</h4>
-            <p style={{ fontSize: '0.9rem', marginBottom: 0 }}>
-              VertexOne Digital Services is a simulated enterprise capstone project designed to showcase practical capability in constructing ISO/IEC 27001:2022 and NIST CSF 2.0 ISMS documentation, risk registers, control ownership matrices, and executive governance dashboards. 
-              <em> (Not real-world employment or customer engagement).</em>
+        {project.simulationNotice && (
+          <div className="notice-panel" role="note">
+            <p>
+              <strong>Simulated enterprise GRC capstone project.</strong> {project.simulationNotice}
             </p>
           </div>
         )}
 
-        {/* Structured Grid Sections */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
-          {project.businessContext && (
-            <div className="card">
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Business Context & Objective</h3>
-              <p style={{ fontSize: '0.925rem', marginBottom: '0.75rem' }}>{project.businessContext}</p>
-              <p style={{ fontSize: '0.925rem', color: 'var(--accent-blue)' }}><strong>Objective:</strong> {project.objective}</p>
-            </div>
-          )}
-
-          {project.scope && (
-            <div className="card">
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Assessment Scope & Methodology</h3>
-              <p style={{ fontSize: '0.925rem', marginBottom: '0.75rem' }}><strong>Scope:</strong> {project.scope}</p>
-              <p style={{ fontSize: '0.925rem' }}><strong>Methodology:</strong> {project.methodology}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Interactive GRC Artifact Viewer (For VertexOne or projects with artifactData) */}
-        {project.artifactData && (
-          <GrcArtifactViewer artifactData={project.artifactData} />
+        {project.isCapstone && (
+          <div className="lifecycle-track" aria-label="ISMS lifecycle covered by this case study">
+            {LIFECYCLE.map((step, index) => (
+              <React.Fragment key={step}>
+                {index > 0 && <span aria-hidden="true">→</span>}
+                <span className="step">{step}</span>
+              </React.Fragment>
+            ))}
+          </div>
         )}
 
-        {/* Controls, Risks, Findings & Deliverables */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '3rem' }}>
-          {project.controls?.length > 0 && (
-            <div className="card">
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>Controls Evaluated</h3>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {project.controls.map((c, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    <CheckCircle2 size={14} style={{ color: 'var(--accent-emerald)' }} />
-                    <span>{c}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <div className="detail-sections">
+          {project.objective && (
+            <section className="detail-block">
+              <h3>Objective</h3>
+              <p>{project.objective}</p>
+            </section>
           )}
-
-          {project.deliverables?.length > 0 && (
-            <div className="card">
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>Documented Deliverables</h3>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {project.deliverables.map((d, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    <FileText size={14} style={{ color: 'var(--accent-blue)' }} />
-                    <span>{d}</span>
-                  </li>
+          {project.businessContext && (
+            <section className="detail-block">
+              <h3>Context</h3>
+              <p>{project.businessContext}</p>
+            </section>
+          )}
+          {project.scope && (
+            <section className="detail-block">
+              <h3>Scope</h3>
+              <p>{project.scope}</p>
+            </section>
+          )}
+          {project.methodology && (
+            <section className="detail-block">
+              <h3>Methodology</h3>
+              <p>{project.methodology}</p>
+            </section>
+          )}
+          {project.frameworks?.length > 0 && (
+            <section className="detail-block">
+              <h3>Frameworks</h3>
+              <ul className="tick-list">
+                {project.frameworks.map((framework) => (
+                  <li key={framework}>{framework}</li>
                 ))}
               </ul>
-            </div>
+            </section>
+          )}
+          {project.controls?.length > 0 && (
+            <section className="detail-block">
+              <h3>Control areas</h3>
+              <ul className="tick-list">
+                {project.controls.map((control) => (
+                  <li key={control}>{control}</li>
+                ))}
+              </ul>
+            </section>
           )}
         </div>
+
+        {project.artifactData && (
+          <GrcArtifactViewer artifactData={project.artifactData} githubUrl={project.githubUrl} />
+        )}
+
+        <div className="detail-sections">
+          {project.findings?.length > 0 && (
+            <section className="detail-block">
+              <h3>Findings</h3>
+              <ul className="tick-list">
+                {project.findings.map((finding) => (
+                  <li key={finding}>{finding}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {project.recommendations?.length > 0 && (
+            <section className="detail-block">
+              <h3>Recommendations</h3>
+              <ul className="tick-list">
+                {project.recommendations.map((rec) => (
+                  <li key={rec}>{rec}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {project.lessonsLearned?.length > 0 && (
+            <section className="detail-block">
+              <h3>Lessons learned</h3>
+              <ul className="tick-list">
+                {project.lessonsLearned.map((lesson) => (
+                  <li key={lesson}>{lesson}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {project.deliverables?.length > 0 && (
+            <section className="detail-block">
+              <h3>Deliverables</h3>
+              <ul className="tick-list tick-list-muted">
+                {project.deliverables.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+
+        {project.githubUrl && (
+          <div className="cta-band">
+            <div>
+              <p className="eyebrow">Evidence</p>
+              <h2>Read the source documentation</h2>
+              <p>Every artefact referenced above lives in the project repository.</p>
+            </div>
+            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="btn btn-accent">
+              <Github size={16} aria-hidden="true" />
+              <span>Open repository</span>
+            </a>
+          </div>
+        )}
       </div>
-    </div>
+    </article>
   );
 }

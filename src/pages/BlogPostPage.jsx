@@ -1,116 +1,123 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Clock, Calendar, Tag, Shield, Share2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { getBlogPostBySlug } from '../services/dataService';
+import PageMeta from '../components/PageMeta';
+
+// Minimal renderer for the markdown subset used in post content:
+// "### " headings, "* " bullet lists, and paragraphs.
+function renderContent(content) {
+  return content.split('\n\n').map((block, index) => {
+    if (block.startsWith('### ')) {
+      return <h2 key={index}>{block.replace('### ', '')}</h2>;
+    }
+    if (block.startsWith('* ')) {
+      return (
+        <ul key={index}>
+          {block.split('\n').map((item, i) => (
+            <li key={i}>{item.replace(/^\* /, '')}</li>
+          ))}
+        </ul>
+      );
+    }
+    return <p key={index}>{block}</p>;
+  });
+}
 
 export default function BlogPostPage({ slug, onNavigate }) {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     async function fetchPost() {
+      setLoading(true);
       try {
         const data = await getBlogPostBySlug(slug);
-        setPost(data);
+        if (!cancelled) setPost(data);
       } catch (err) {
-        console.error("Failed to load blog post:", err);
+        console.error('Failed to load blog post:', err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     fetchPost();
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   if (loading) {
     return (
-      <div className="section container" style={{ textAlign: 'center', padding: '6rem 0' }}>
-        <p style={{ color: 'var(--text-muted)' }}>Loading article...</p>
+      <div className="section container">
+        <p className="empty-state">Loading article…</p>
       </div>
     );
   }
 
   if (!post) {
     return (
-      <div className="section container" style={{ textAlign: 'center', padding: '6rem 0' }}>
-        <h2>Post Not Found</h2>
-        <p style={{ marginBottom: '2rem' }}>The requested blog post could not be located.</p>
-        <button className="btn btn-outline" onClick={() => onNavigate('/blog')}>
-          <ArrowLeft size={16} />
-          <span>Back to Blog</span>
-        </button>
+      <div className="section container">
+        <div className="empty-state">
+          <h2>Post not found</h2>
+          <p>The requested article could not be located.</p>
+          <button type="button" className="btn btn-outline" onClick={() => onNavigate('/blog')}>
+            <ArrowLeft size={16} aria-hidden="true" />
+            <span>Back to writing</span>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <article className="blog-post-page section">
+      <PageMeta
+        title={post.seoTitle || post.title}
+        description={post.seoDescription || post.excerpt}
+        path={`/blog/${post.slug}`}
+        type="article"
+        article={{
+          title: post.title,
+          description: post.seoDescription || post.excerpt,
+          publishedAt: post.publishedAt,
+          updatedAt: post.updatedAt,
+        }}
+      />
       <div className="container">
-        <button 
-          className="btn btn-outline btn-sm"
-          onClick={() => onNavigate('/blog')}
-          style={{ marginBottom: '2rem' }}
+        <a
+          href="/blog"
+          className="back-link"
+          onClick={(e) => {
+            e.preventDefault();
+            onNavigate('/blog');
+          }}
         >
-          <ArrowLeft size={14} />
-          <span>Back to Articles</span>
-        </button>
+          <ArrowLeft size={14} aria-hidden="true" />
+          <span>All posts</span>
+        </a>
 
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <header style={{ marginBottom: '2.5rem', borderBottom: '1px solid var(--border-color)', pb: '2rem' }}>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-              <span className="badge badge-indigo">{post.category}</span>
-              {post.tags?.map((t, i) => (
-                <span key={i} className="badge">#{t}</span>
-              ))}
-            </div>
-
-            <h1 style={{ marginBottom: '1.25rem', lineHeight: '1.3' }}>{post.title}</h1>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', color: 'var(--text-muted)', fontSize: '0.875rem', fontFamily: 'var(--font-mono)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Calendar size={14} />
-                <span>{post.publishedAt}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Clock size={14} />
-                <span>{post.readingTime}</span>
-              </div>
-              <span>By Aryan Neupane</span>
-            </div>
-          </header>
-
-          {/* Article Body */}
-          <div 
-            style={{ 
-              fontSize: '1.05rem', 
-              lineHeight: '1.8', 
-              color: 'var(--text-secondary)' 
-            }}
-          >
-            {post.content.split('\n\n').map((paragraph, idx) => {
-              if (paragraph.startsWith('### ')) {
-                return (
-                  <h3 key={idx} style={{ color: 'var(--text-primary)', marginTop: '2rem', marginBottom: '1rem', fontSize: '1.35rem' }}>
-                    {paragraph.replace('### ', '')}
-                  </h3>
-                );
-              }
-              if (paragraph.startsWith('* ')) {
-                const items = paragraph.split('\n');
-                return (
-                  <ul key={idx} style={{ paddingLeft: '1.25rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {items.map((item, i) => (
-                      <li key={i}>{item.replace('* ', '')}</li>
-                    ))}
-                  </ul>
-                );
-              }
-              return (
-                <p key={idx} style={{ marginBottom: '1.5rem' }}>
-                  {paragraph}
-                </p>
-              );
-            })}
+        <header className="article-header">
+          <p className="eyebrow">{post.category}</p>
+          <h1>{post.title}</h1>
+          <p className="page-lead">{post.excerpt}</p>
+          <div className="article-meta">
+            <span>Aryan Neupane</span>
+            <time dateTime={post.publishedAt}>{post.publishedAt}</time>
+            <span>{post.readingTime}</span>
           </div>
-        </div>
+        </header>
+
+        <div className="article-body article-content">{renderContent(post.content || '')}</div>
+
+        {post.tags?.length > 0 && (
+          <div className="article-body tag-row" style={{ marginTop: '2.5rem' }}>
+            {post.tags.map((tag) => (
+              <span key={tag} className="badge">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </article>
   );

@@ -94,25 +94,9 @@ export default function App() {
     navigateTo('/');
   };
 
-  const getMeta = () => {
-    if (currentPath.startsWith('/portfolio/')) {
-      return {
-        title: 'Project',
-        description: 'Portfolio project case study and GRC artifacts.',
-        path: currentPath,
-      };
-    }
-    if (currentPath.startsWith('/blog/')) {
-      return {
-        title: 'Article',
-        description: 'Cybersecurity and GRC technical article.',
-        path: currentPath,
-      };
-    }
-    return { ...ROUTE_META[currentPath], path: currentPath };
-  };
-
-  const meta = getMeta();
+  // Detail routes render their own PageMeta once their content has loaded.
+  const isDetailRoute = currentPath.startsWith('/portfolio/') || currentPath.startsWith('/blog/');
+  const meta = { ...ROUTE_META[currentPath], path: currentPath };
 
   const renderRoute = () => {
     if (currentPath === '/') {
@@ -172,7 +156,7 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <PageMeta title={meta.title} description={meta.description} path={meta.path} />
+      {!isDetailRoute && <PageMeta title={meta.title} description={meta.description} path={meta.path} />}
       <ScrollToTop path={currentPath} />
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         {!isAdminRoute && <Navbar currentPath={currentPath} onNavigate={navigateTo} />}
