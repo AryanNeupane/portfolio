@@ -1,0 +1,57 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.uid == "ADMIN_USER_ID_PLACEHOLDER" ||
+        (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+        )
+      );
+    }
+
+    function isValidContactMessage() {
+      return request.resource.data.keys().hasAll(['name', 'email', 'message']) &&
+             request.resource.data.name is string &&
+             request.resource.data.email is string &&
+             request.resource.data.message is string &&
+             request.resource.data.name.size() > 0 &&
+             request.resource.data.name.size() <= 120 &&
+             request.resource.data.email.size() > 3 &&
+             request.resource.data.email.size() <= 254 &&
+             request.resource.data.message.size() > 0 &&
+             request.resource.data.message.size() <= 5000;
+    }
+
+    match /projects/{projectId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /blogPosts/{postId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /contactMessages/{messageId} {
+      allow create: if isValidContactMessage();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+
+    match /auditLogs/{logId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

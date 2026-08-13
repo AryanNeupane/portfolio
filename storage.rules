@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.uid == "ADMIN_USER_ID_PLACEHOLDER" ||
+        (
+          firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == "admin"
+        )
+      );
+    }
+
+    function isValidUpload() {
+      return request.resource.size < 10 * 1024 * 1024 &&
+             (request.resource.contentType.matches('image/.*') ||
+              request.resource.contentType.matches('application/pdf'));
+    }
+
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidUpload();
+    }
+
+    match /{allPaths=**} {
+      allow read: if isAdmin();
+      allow write: if isAdmin() && isValidUpload();
+    }
+  }
+}
