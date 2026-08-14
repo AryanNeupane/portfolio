@@ -34,49 +34,49 @@ export default function AboutPage({ onNavigate }) {
           </div>
 
           {/* Academic Foundation */}
-          <div style={{ marginBottom: '3rem' }}>
-            <h2 style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <BookOpen size={22} style={{ color: 'var(--accent-primary)' }} />
+          <div style={{ marginBottom: '4rem' }}>
+            <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+              <BookOpen size={24} style={{ color: 'var(--accent-primary)' }} />
               <span>Academic Foundation</span>
             </h2>
-            <div className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <h3 style={{ fontSize: '1.2rem' }}>{PERSONAL_PROFILE.education.degree}</h3>
+            <div style={{ padding: '1.5rem', background: 'var(--bg-secondary)', borderLeft: '3px solid var(--accent-primary)', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1.3rem', letterSpacing: '-0.02em' }}>{PERSONAL_PROFILE.education.degree}</h3>
                 <span className="badge badge-blue">{PERSONAL_PROFILE.education.status}</span>
               </div>
-              <div style={{ fontSize: '0.95rem', color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)', marginBottom: '0.75rem' }}>
+              <div style={{ fontSize: '1rem', color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)', marginBottom: '1rem' }}>
                 {PERSONAL_PROFILE.education.institution} • {PERSONAL_PROFILE.education.location}
               </div>
-              <p style={{ fontSize: '0.925rem' }}>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                 The BIM program combines information technology, software management, data analysis, and business administration, providing a strong contextual foundation for enterprise GRC governance.
               </p>
             </div>
           </div>
 
           {/* Experience & Mentorship */}
-          <div style={{ marginBottom: '3rem' }}>
-            <h2 style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Shield size={22} style={{ color: 'var(--accent-primary)' }} />
+          <div style={{ marginBottom: '4rem' }}>
+            <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+              <Shield size={24} style={{ color: 'var(--accent-primary)' }} />
               <span>Practical Experience & Mentorship</span>
             </h2>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {PERSONAL_PROFILE.experience.map((exp, idx) => (
-                <div key={idx} className="card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <h3 style={{ fontSize: '1.2rem' }}>{exp.role}</h3>
+                <div key={idx} style={{ padding: '1.5rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <h3 style={{ fontSize: '1.3rem', letterSpacing: '-0.02em' }}>{exp.role}</h3>
                     <span className="badge badge-indigo">{exp.type}</span>
                   </div>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)', marginBottom: '0.75rem' }}>
+                  <div style={{ fontSize: '1rem', color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)', marginBottom: '1rem' }}>
                     {exp.organization} {exp.location ? `• ${exp.location}` : ''}
                   </div>
-                  <p style={{ fontSize: '0.925rem', marginBottom: '1rem' }}>
+                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
                     {exp.description}
                   </p>
-                  <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                     {exp.highlights.map((item, hIdx) => (
-                      <li key={hIdx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                        <CheckCircle2 size={14} style={{ color: 'var(--accent-primary)' }} />
+                      <li key={hIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                        <CheckCircle2 size={16} style={{ color: 'var(--accent-primary)', marginTop: '0.2rem', flexShrink: 0 }} />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -87,25 +87,25 @@ export default function AboutPage({ onNavigate }) {
           </div>
 
           {/* Practical Practice */}
-          <div style={{ marginBottom: '3rem' }}>
-            <h2 style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <Award size={22} style={{ color: 'var(--accent-primary)' }} />
+          <div style={{ marginBottom: '4rem' }}>
+            <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+              <Award size={24} style={{ color: 'var(--accent-primary)' }} />
               <span>Hands-on Technical Practice</span>
             </h2>
 
             <div className="grid-2">
-              <div className="card">
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>TryHackMe Learning Path</h3>
-                <span className="badge badge-emerald" style={{ marginBottom: '0.75rem' }}>40+ Rooms Completed</span>
-                <p style={{ fontSize: '0.875rem' }}>
+              <div style={{ padding: '1.5rem', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.75rem' }}>TryHackMe Learning Path</h3>
+                <span className="badge badge-emerald" style={{ marginBottom: '1rem' }}>40+ Rooms Completed</span>
+                <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
                   Completed over 40 structured learning rooms focused on network fundamentals, Linux privilege escalation, web application vulnerabilities, and incident investigation.
                 </p>
               </div>
 
-              <div className="card">
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>DVWA Security Practice</h3>
-                <span className="badge badge-blue" style={{ marginBottom: '0.75rem' }}>Controlled Lab Environment</span>
-                <p style={{ fontSize: '0.875rem' }}>
+              <div style={{ padding: '1.5rem', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.75rem' }}>DVWA Security Practice</h3>
+                <span className="badge badge-blue" style={{ marginBottom: '1rem' }}>Controlled Lab Environment</span>
+                <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
                   Conducted manual web security analysis on Damn Vulnerable Web Application to evaluate SQL injection, XSS, and command execution PoCs in isolated settings.
                 </p>
               </div>

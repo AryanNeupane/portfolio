@@ -14,7 +14,7 @@ export const PERSONAL_PROFILE = {
     status: "Ongoing Studies"
   },
   emails: [
-    "official.aryanneupane@gmail.com"
+    "contact@aryanneupane.com.np"
   ],
   socialLinks: {
     github: "https://github.com/AryanNeupane",
@@ -333,5 +333,85 @@ Understanding cybersecurity governance requires firsthand knowledge of how techn
 2. **Sysmon (System Monitor)**: Ingesting Event ID 1 (Process Creation) to inspect command-line arguments.
 3. **Web Server Logs**: Analyzing HTTP status codes (404, 500, 403) for automated scanner activity.
 `
+  }
+];
+
+export const SEED_CERTIFICATIONS = [
+  {
+    id: "soc-lvl-1-thm",
+    title: "SOC Level 1 Certificate",
+    issuer: "TryHackMe",
+    issued: "May 2026",
+    expires: "May 2029",
+    credentialId: "THM-UFWN7SISSE",
+    skills: ["Splunk", "SIEM"],
+    verificationUrl: "https://tryhackme.com/certificate/THM-UFWN7SISSE",
+    featured: true
+  },
+  {
+    id: "cisco-cyber-defense",
+    title: "Cybersecurity Defense Analyst Career Path",
+    issuer: "Cisco",
+    issued: "2026",
+    expires: "",
+    credentialId: "de7f35c3-0b1e-4028-9e97-253131523cb8",
+    skills: ["Splunk"],
+    verificationUrl: "",
+    featured: true
+  },
+  {
+    id: "tata-cyber-forage",
+    title: "Tata - Cybersecurity Analyst Job Simulation",
+    issuer: "Forage",
+    issued: "April 2026",
+    expires: "",
+    credentialId: "ddzyBasfWM9MGZJgY",
+    skills: ["Cybersecurity"],
+    verificationUrl: "",
+    featured: false
+  },
+  {
+    id: "qualys-compliance",
+    title: "Compliance Foundations",
+    issuer: "Qualys",
+    issued: "April 2026",
+    expires: "",
+    credentialId: "",
+    skills: ["Compliance"],
+    verificationUrl: "",
+    featured: false
+  },
+  {
+    id: "qualys-vuln-mgmt",
+    title: "Vulnerability Management Foundations",
+    issuer: "Qualys",
+    issued: "April 2026",
+    expires: "",
+    credentialId: "",
+    skills: ["Vulnerability Management"],
+    verificationUrl: "",
+    featured: false
+  },
+  {
+    id: "simplilearn-cissp-intro",
+    title: "Introduction to CISSP Security Assessment & Testing and Security Operations",
+    issuer: "Simplilearn",
+    issued: "March 2026",
+    expires: "",
+    credentialId: "9970413",
+    skills: ["Security Assessment", "Security Operations"],
+    verificationUrl: "",
+    featured: false
+  },
+  {
+    id: "cisco-jr-cyber",
+    title: "Junior Cybersecurity Analyst Career Path",
+    issuer: "Cisco",
+    issued: "March 2026",
+    expires: "",
+    credentialId: "74d12366-0c28-4a59-b582-d4cb8715642d",
+    skills: ["Linux", "Firewalls", "Networking"],
+    verificationUrl: "",
+    featured: true
   }
 ];

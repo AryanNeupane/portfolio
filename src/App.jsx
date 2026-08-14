@@ -70,15 +70,12 @@ export default function App() {
       unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
           try {
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            
-            if (userDoc.exists() && userDoc.data().role === 'admin') {
+            if (user.email === 'official.aryanneupane@gmail.com') {
               setIsAdminAuthenticated(true);
             } else {
-              // Valid login but not an admin
+              // Valid login but not the admin email
               setIsAdminAuthenticated(false);
-              // Optionally sign them out since this app is only for admins
-              // await signOut(auth);
+              await signOut(auth);
             }
           } catch (err) {
             console.error("Authorization check failed:", err);

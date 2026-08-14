@@ -16,6 +16,8 @@ export const sendEmailJSMessage = async (formData) => {
           email: formData.email,
           from_name: formData.name,
           from_email: formData.email,
+          to_email: 'contact@aryanneupane.com.np',
+          to_name: 'Aryan Neupane',
           subject: formData.subject || 'General Portfolio Inquiry',
           company: formData.company || 'N/A',
           reason: formData.reason || 'General Contact',

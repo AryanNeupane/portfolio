@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Shield, ArrowRight, Download, CheckCircle2, Award, Terminal, FileCheck, ExternalLink, ChevronRight, Github, Mail, BookOpen, Layers, AlertTriangle } from 'lucide-react';
 import { PERSONAL_PROFILE } from '../data/seedData';
-import { getProjects, getBlogPosts } from '../services/dataService';
+import { getProjects, getBlogPosts, getCertifications } from '../services/dataService';
 
 export default function HomePage({ onNavigate }) {
   const [featuredProjects, setFeaturedProjects] = useState([]);
   const [recentPosts, setRecentPosts] = useState([]);
+  const [certifications, setCertifications] = useState([]);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [projects, posts] = await Promise.all([getProjects(), getBlogPosts()]);
+        const [projects, posts, certs] = await Promise.all([getProjects(), getBlogPosts(), getCertifications()]);
         setFeaturedProjects(projects);
         setRecentPosts(posts.slice(0, 3));
+        setCertifications(certs.filter(c => c.featured));
       } catch (err) {
         console.error("Error loading homepage data:", err);
       }
@@ -215,65 +217,7 @@ export default function HomePage({ onNavigate }) {
         </div>
       </section>
 
-      {/* 6. FEATURED VERTEXONE CAPSTONE */}
-      {capstoneProject && (
-        <section className="section" style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
-          <div className="container">
-            <div className="flagship-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div>
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                    <span className="badge badge-blue">Flagship GRC Case Study</span>
-                    <span className="badge badge-amber">Simulated Enterprise Capstone</span>
-                  </div>
-                  <h2 style={{ fontSize: '1.8rem', color: 'var(--text-primary)' }}>{capstoneProject.title}</h2>
-                </div>
-
-                <button 
-                  className="btn btn-accent"
-                  onClick={() => onNavigate(`/portfolio/${capstoneProject.slug}`)}
-                >
-                  <span>Explore Case Study & Artifacts</span>
-                  <ArrowRight size={16} />
-                </button>
-              </div>
-
-              <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2rem', maxWidth: '900px' }}>
-                {capstoneProject.summary}
-              </p>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', background: 'var(--bg-tertiary)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', marginBottom: '2rem' }}>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Frameworks Applied</div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                    ISO/IEC 27001:2022 & NIST CSF 2.0
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Core Deliverables</div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                    Risk Register, SoA, Control Ownership, Dashboards
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>Evidence Type</div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                    14 Documented GRC Artifacts
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                * Standard Capstone Taxonomy: VertexOne Digital Services represents a simulated enterprise scenario developed to demonstrate practical GRC execution.
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 7. CERTIFICATIONS */}
+      {/* 6. CERTIFICATIONS */}
       <section className="section" style={{ borderBottom: '1px solid var(--border-color)' }}>
         <div className="container">
           <div style={{ marginBottom: '2.5rem' }}>
@@ -282,19 +226,27 @@ export default function HomePage({ onNavigate }) {
           </div>
 
           <div className="grid-3">
-            {PERSONAL_PROFILE.certifications.map((cert) => (
+            {certifications.map((cert) => (
               <div key={cert.id} className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                   <Award size={24} style={{ color: 'var(--accent-primary)' }} />
-                  <span className="badge badge-emerald">{cert.status}</span>
+                  <span className="badge badge-emerald">Verified</span>
                 </div>
                 <h3 style={{ fontSize: '1.1rem', marginBottom: '0.3rem' }}>{cert.title}</h3>
                 <div style={{ fontSize: '0.85rem', color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)', marginBottom: '0.75rem' }}>
-                  {cert.issuer}
+                  {cert.issuer} • {cert.issued}
                 </div>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  {cert.description}
-                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1rem' }}>
+                  {cert.skills?.map((skill, sIdx) => (
+                    <span key={sIdx} className="badge">{skill}</span>
+                  ))}
+                </div>
+                {cert.verificationUrl && (
+                  <a href={cert.verificationUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    <span>Verify Credential</span>
+                    <ExternalLink size={14} />
+                  </a>
+                )}
               </div>
             ))}
           </div>

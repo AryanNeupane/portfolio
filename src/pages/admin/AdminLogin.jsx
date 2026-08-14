@@ -1,35 +1,59 @@
-import React, { useState } from 'react';
-import { Lock, AlertCircle, Key } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Lock, AlertCircle, Key, LogIn } from 'lucide-react';
 import { auth } from '../../services/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 export default function AdminLogin({ onNavigate }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [status, setStatus] = useState({ loading: false, error: null });
+  const [status, setStatus] = useState({ loading: false, loadingMessage: '', error: null });
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setStatus({ loading: true, error: null });
+  const handleGoogleLogin = async (e) => {
+    if (e) e.preventDefault();
+    setStatus({ loading: true, loadingMessage: 'Signing in...', error: null });
 
     if (!auth) {
       setStatus({
         loading: false,
+        loadingMessage: '',
         error: 'Firebase Authentication is not configured. Add credentials to your local .env file.',
       });
       return;
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-      // Wait a moment for onAuthStateChanged to process. If it doesn't unmount us (because they aren't admin), reset loading.
-      setTimeout(() => {
-        setStatus(prev => prev.loading ? { loading: false, error: 'Authentication successful, but you are not authorized as an administrator.' } : prev);
-      }, 2000);
+      const provider = new GoogleAuthProvider();
+      // Prompt user to select account if they have multiple
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
+      const result = await signInWithPopup(auth, provider);
+      
+      setStatus({ loading: true, loadingMessage: 'Checking authorization...', error: null });
+      
+      // Explicit Frontend Authorization Check
+      if (result.user.email !== 'official.aryanneupane@gmail.com') {
+        const { signOut } = await import('firebase/auth');
+        await signOut(auth);
+        setStatus({ 
+          loading: false, 
+          loadingMessage: '',
+          error: 'Access denied. This account is not authorized for administration.' 
+        });
+        return;
+      }
+      
+      // If authorized, App.jsx's onAuthStateChanged will handle the routing.
+
     } catch (err) {
       console.error("Firebase Auth Error:", err);
+      // Ignore if user just closed the popup
+      if (err.code === 'auth/popup-closed-by-user') {
+        setStatus({ loading: false, loadingMessage: '', error: null });
+        return;
+      }
       setStatus({
         loading: false,
+        loadingMessage: '',
         error: `Firebase Auth Error: ${err.code || err.message}`,
       });
     }
@@ -77,53 +101,28 @@ export default function AdminLogin({ onNavigate }) {
                 fontSize: '0.875rem',
               }}
             >
-              <AlertCircle size={16} />
-              <span>{status.error}</span>
+              <AlertCircle size={16} style={{ flexShrink: 0 }} />
+              <span style={{ wordBreak: 'break-word' }}>{status.error}</span>
             </div>
           )}
 
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label className="form-label" htmlFor="admin-email">
-                Admin Email
-              </label>
-              <input
-                id="admin-email"
-                type="email"
-                required
-                autoComplete="username"
-                className="form-input"
-                placeholder="official.aryanneupane@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="admin-pass">
-                Password
-              </label>
-              <input
-                id="admin-pass"
-                type="password"
-                required
-                autoComplete="current-password"
-                className="form-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            <button type="submit" className="btn btn-accent" style={{ width: '100%', marginTop: '0.5rem' }} disabled={status.loading}>
-              <Key size={16} />
-              <span>{status.loading ? 'Authenticating...' : 'Sign In'}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <button 
+              onClick={handleGoogleLogin}
+              className="btn btn-accent" 
+              style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} 
+              disabled={status.loading}
+            >
+              <LogIn size={18} />
+              <span>{status.loading ? status.loadingMessage : 'Continue with Google'}</span>
             </button>
-          </form>
+          </div>
 
           <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             <button
               style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
               onClick={() => onNavigate('/')}
+              disabled={status.loading}
             >
               Return to site
             </button>

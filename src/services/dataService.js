@@ -1,11 +1,13 @@
 import { db } from './firebase';
 import { collection, getDocs, getDoc, doc, addDoc, updateDoc, deleteDoc, query, where, orderBy, Timestamp, serverTimestamp } from 'firebase/firestore';
-import { SEED_PROJECTS, SEED_BLOG_POSTS, PERSONAL_PROFILE } from '../data/seedData';
+import { SEED_PROJECTS, SEED_BLOG_POSTS, PERSONAL_PROFILE, SEED_CERTIFICATIONS } from '../data/seedData';
 
 // Storage keys for offline / development fallback
 const STORAGE_PROJECTS_KEY = 'aryan_portfolio_projects';
 const STORAGE_BLOG_KEY = 'aryan_portfolio_blog';
 const STORAGE_MESSAGES_KEY = 'aryan_portfolio_messages';
+const STORAGE_CERTIFICATIONS_KEY = 'aryan_portfolio_certifications';
+const STORAGE_SETTINGS_KEY = 'aryan_portfolio_settings';
 
 // Helper to initialize local storage if empty
 const initLocalStorage = () => {
@@ -17,6 +19,12 @@ const initLocalStorage = () => {
   }
   if (!localStorage.getItem(STORAGE_MESSAGES_KEY)) {
     localStorage.setItem(STORAGE_MESSAGES_KEY, JSON.stringify([]));
+  }
+  if (!localStorage.getItem(STORAGE_CERTIFICATIONS_KEY)) {
+    localStorage.setItem(STORAGE_CERTIFICATIONS_KEY, JSON.stringify(SEED_CERTIFICATIONS));
+  }
+  if (!localStorage.getItem(STORAGE_SETTINGS_KEY)) {
+    localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify(PERSONAL_PROFILE));
   }
 };
 
@@ -181,6 +189,10 @@ export const saveBlogPost = async (postData) => {
 // CONTACT MESSAGES SERVICE
 // ==========================================
 export const submitContactMessage = async (messageData) => {
+  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || 'portfolio-92c05';
+  // Use cloud function endpoint for rate limiting logic instead of direct firestore write
+  const endpoint = `https://us-central1-${projectId}.cloudfunctions.net/submitContactMessage`;
+
   const payload = {
     ...messageData,
     read: false,
@@ -188,23 +200,36 @@ export const submitContactMessage = async (messageData) => {
   };
 
   try {
-    if (db) {
-      const docRef = await addDoc(collection(db, 'contactMessages'), {
-        ...messageData,
-        read: false,
-        createdAt: serverTimestamp()
-      });
-      return { success: true, id: docRef.id };
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(messageData)
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('429: Too many contact form submissions. Please try again after 24 hours.');
+      }
+      throw new Error(result.error || 'Failed to submit message');
     }
+    
+    return { success: true, id: result.id };
   } catch (error) {
-    console.warn("Firestore contact message submission failed, saving locally:", error.message);
+    if (error.message && error.message.includes('429')) {
+      throw error; // Let the UI handle rate limit explicitly
+    }
+    
+    console.warn("Cloud function failed, falling back to local storage if available:", error.message);
+    const stored = JSON.parse(localStorage.getItem(STORAGE_MESSAGES_KEY) || '[]');
+    const newMsg = { id: 'msg-' + Date.now(), ...payload };
+    stored.unshift(newMsg);
+    localStorage.setItem(STORAGE_MESSAGES_KEY, JSON.stringify(stored));
+    return { success: true, id: newMsg.id };
   }
-
-  const stored = JSON.parse(localStorage.getItem(STORAGE_MESSAGES_KEY) || '[]');
-  const newMsg = { id: 'msg-' + Date.now(), ...payload };
-  stored.unshift(newMsg);
-  localStorage.setItem(STORAGE_MESSAGES_KEY, JSON.stringify(stored));
-  return { success: true, id: newMsg.id };
 };
 
 export const getContactMessages = async () => {
@@ -221,4 +246,95 @@ export const getContactMessages = async () => {
   }
 
   return JSON.parse(localStorage.getItem(STORAGE_MESSAGES_KEY) || '[]');
+};
+
+// ==========================================
+// CERTIFICATIONS SERVICE
+// ==========================================
+export const getCertifications = async () => {
+  try {
+    if (db) {
+      const q = query(collection(db, 'certifications'));
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+    }
+  } catch (error) {
+    console.warn("Firestore certifications query failed:", error.message);
+  }
+  return JSON.parse(localStorage.getItem(STORAGE_CERTIFICATIONS_KEY) || '[]');
+};
+
+export const saveCertification = async (certData) => {
+  const isEdit = Boolean(certData.id && !certData.id.startsWith('cert-')); // New items locally start with cert-
+  try {
+    if (db) {
+      if (isEdit) {
+        const ref = doc(db, 'certifications', certData.id);
+        await updateDoc(ref, { ...certData });
+        return certData.id;
+      } else {
+        const docRef = await addDoc(collection(db, 'certifications'), { ...certData });
+        return docRef.id;
+      }
+    }
+  } catch (error) {
+    console.warn("Firestore certification save failed:", error.message);
+  }
+  
+  const stored = JSON.parse(localStorage.getItem(STORAGE_CERTIFICATIONS_KEY) || '[]');
+  if (isEdit) {
+    const updated = stored.map(c => c.id === certData.id ? { ...certData } : c);
+    localStorage.setItem(STORAGE_CERTIFICATIONS_KEY, JSON.stringify(updated));
+    return certData.id;
+  } else {
+    const newId = 'cert-' + Date.now();
+    const newCert = { ...certData, id: newId };
+    stored.push(newCert);
+    localStorage.setItem(STORAGE_CERTIFICATIONS_KEY, JSON.stringify(stored));
+    return newId;
+  }
+};
+
+export const deleteCertification = async (id) => {
+  try {
+    if (db && !id.startsWith('cert-')) {
+      await deleteDoc(doc(db, 'certifications', id));
+    }
+  } catch (error) {
+    console.warn("Firestore delete failed:", error.message);
+  }
+  const stored = JSON.parse(localStorage.getItem(STORAGE_CERTIFICATIONS_KEY) || '[]');
+  localStorage.setItem(STORAGE_CERTIFICATIONS_KEY, JSON.stringify(stored.filter(c => c.id !== id)));
+};
+
+// ==========================================
+// SETTINGS SERVICE
+// ==========================================
+export const getSettings = async () => {
+  try {
+    if (db) {
+      const docRef = doc(db, 'settings', 'profile');
+      const snapshot = await getDoc(docRef);
+      if (snapshot.exists()) {
+        return snapshot.data();
+      }
+    }
+  } catch (error) {
+    console.warn("Firestore settings query failed:", error.message);
+  }
+  return JSON.parse(localStorage.getItem(STORAGE_SETTINGS_KEY) || '{}');
+};
+
+export const saveSettings = async (settingsData) => {
+  try {
+    if (db) {
+      await updateDoc(doc(db, 'settings', 'profile'), { ...settingsData });
+    }
+  } catch (error) {
+    console.warn("Firestore settings save failed, trying setDoc or local:", error.message);
+  }
+  localStorage.setItem(STORAGE_SETTINGS_KEY, JSON.stringify(settingsData));
+  return true;
 };
